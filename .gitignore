@@ -1,0 +1,13 @@
+.idea
+.DS_Store
+node_modules
+
+log
+tmp
+
+# Hardhat files
+cache-zk
+artifacts-zk
+
+# Openzeppelin upgrade
+.upgradable
