@@ -2,10 +2,21 @@
 pragma solidity 0.8.20;
 
 interface IMergeTokenPortal {
+    event DepositToMerge(
+        address indexed sourceToken,
+        address mergeToken,
+        address sender,
+        uint256 amount,
+        address receiver
+    );
 
-    event DepositToMerge(address indexed sourceToken, address mergeToken, address sender, uint256 amount, address  receiver);
-
-    event WithdrawFromMerge(address indexed sourceToken, address mergeToken, address sender, uint256 amount, address  receiver);
+    event WithdrawFromMerge(
+        address indexed sourceToken,
+        address mergeToken,
+        address sender,
+        uint256 amount,
+        address receiver
+    );
 
     event SourceTokenAdded(address indexed sourceToken, address mergeToken, uint256 depositLimit);
 
