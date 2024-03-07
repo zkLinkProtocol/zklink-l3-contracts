@@ -4,7 +4,7 @@ import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableSetUpgradeab
 
 contract AdminRoleUpgrade {
     using EnumerableSetUpgradeable for EnumerableSetUpgradeable.AddressSet;
- 
+
     EnumerableSetUpgradeable.AddressSet private _admins;
 
     event AdminAdded(address indexed account);
@@ -15,10 +15,7 @@ contract AdminRoleUpgrade {
     // }
 
     modifier onlyAdmin() {
-        require(
-            isAdmin(msg.sender),
-            "AdminRole: caller does not have the Admin role"
-        );
+        require(isAdmin(msg.sender), "AdminRole: caller does not have the Admin role");
         _;
     }
 
@@ -33,8 +30,8 @@ contract AdminRoleUpgrade {
         }
     }
 
-    function batchAddAdmin(address[] memory amounts) public onlyAdmin{
-        for(uint256 i=0; i < amounts.length; i++){
+    function batchAddAdmin(address[] memory amounts) public onlyAdmin {
+        for (uint256 i = 0; i < amounts.length; i++) {
             addAdmin(amounts[i]);
         }
     }
@@ -55,7 +52,7 @@ contract AdminRoleUpgrade {
         _admins.add(account);
         emit AdminAdded(account);
     }
-    
+
     function _removeAdmin(address account) internal {
         _admins.remove(account);
         emit AdminRemoved(account);
