@@ -1,29 +1,33 @@
 // SPDX-License-Identifier: MIT
-
 pragma solidity 0.8.20;
 
-import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {ERC20PermitUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/draft-ERC20PermitUpgradeable.sol";
+import {IERC20MergeToken} from "../interfaces/IERC20MergeToken.sol";
 
-contract ERC20TokenMerge is Initializable {
-    using SafeERC20 for IERC20;
-
-    /// @dev A mapping source token address => merge token address
-    mapping(IERC20 sourceToken => IERC20 mergeToken) public mergeTokenAddress;
+contract ERC20MergeToken is ERC20PermitUpgradeable, IERC20MergeToken {
+    address public immutable manager;
 
     /// @dev Contract is expected to be used as proxy implementation.
     /// @dev Disable the initialization to prevent Parity hack.
-    constructor() {
+    constructor(address _manager) {
         _disableInitializers();
+
+        manager = _manager;
     }
 
     /// @notice Initializes the bridge contract for later use. Expected to be used in the proxy.
-    function initialize() external initializer {}
+    function initialize(string memory name_, string memory symbol_) external initializer {
+        __ERC20_init_unchained(name_, symbol_);
+        __ERC20Permit_init(name_);
+    }
 
-    /// @notice Deposit source token to mint merge token
-    function deposit(IERC20 _sourceToken, uint256 _amount, address _receiver) external {}
+    function mint(address _receiver, uint256 _amount) external {
+        require(msg.sender == manager, "ERC20MergeToken: forbidden");
+        _mint(_receiver, _amount);
+    }
 
-    /// @notice Burn merge token and get source token back
-    function withdraw(IERC20 _sourceToken, uint256 _amount, address _receiver) external {}
+    function burn(address _from, uint256 _amount) external {
+        require(msg.sender == manager, "ERC20MergeToken: forbidden");
+        _burn(_from, _amount);
+    }
 }
