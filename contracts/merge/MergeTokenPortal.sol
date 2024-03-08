@@ -4,10 +4,12 @@ pragma solidity 0.8.20;
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import {IMergeTokenPortal} from "../interfaces/IMergeTokenPortal.sol";
 import {IERC20MergeToken} from "../interfaces/IERC20MergeToken.sol";
 
-contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable {
+contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     /// @dev MAX_UINT256
     uint256 public constant MAX_UINT256 = type(uint256).max;
@@ -15,11 +17,13 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable {
     /// @dev Governance address
     address public immutable governance;
 
-    /// @dev A mapping source token address => merge token address.
-    mapping(address sourceToken => address mergeToken) public mergeTokenMap;
-
     /// @dev A mapping source token address => source token status.
     mapping(address sourceToken => SourceTokenInfo) public sourceTokenInfoMap;
+
+    modifier onlyGovernance() {
+        require(msg.sender == governance, "MergeTokenPortal: forbidden");
+        _;
+    }
 
     /// @dev Contract is expected to be used as proxy implementation.
     /// @dev Disable the initialization to prevent Parity hack.
@@ -29,67 +33,68 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable {
         governance = _governance;
     }
 
-    /// @notice Initializes the bridge contract for later use. Expected to be used in the proxy.
+    /// @notice Initializes the portal contract.
     function initialize() external initializer {
         __UUPSUpgradeable_init();
+        __Ownable_init();
+        __ReentrancyGuard_init();
     }
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyGovernance {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
-    modifier onlyGovernance() {
-        require(msg.sender == governance, "MergeTokenManager: forbidden");
-        _;
-    }
-
-    function getMergeTokenAddress(address _sourceToken) public view override returns (address) {
-        return mergeTokenMap[_sourceToken];
-    }
-
+    /// @notice Get source token info
     function getSourceTokenInfos(address _sourceToken) public view override returns (SourceTokenInfo memory) {
         return sourceTokenInfoMap[_sourceToken];
     }
 
     /// @notice Deposit source token to mint merge token
-    function deposit(address _sourceToken, uint256 _amount, address _receiver) external override {
-        require(_amount > 0, "amount is 0");
+    function deposit(address _sourceToken, uint256 _amount, address _receiver) external override nonReentrant {
+        require(_amount > 0, "ae0");
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
-        require(tokenInfo.isSupported == true, "not the token");
-        require(tokenInfo.isLocked == false, "locked");
+        require(tokenInfo.isSupported == true, "ns");
+        require(tokenInfo.isLocked == false, "dd");
 
-        require(tokenInfo.balance + _amount <= tokenInfo.depositLimit, "exceed depositLimit");
+        uint256 afterBalance;
+        unchecked {
+            afterBalance = tokenInfo.balance + _amount;
+        }
+        require(afterBalance <= tokenInfo.depositLimit, "el");
 
         IERC20Upgradeable(_sourceToken).safeTransferFrom(msg.sender, address(this), _amount);
-        tokenInfo.balance += _amount;
-        sourceTokenInfoMap[_sourceToken] = tokenInfo;
-        IERC20MergeToken mergeToken = IERC20MergeToken(mergeTokenMap[_sourceToken]);
-        mergeToken.mint(_receiver, _amount);
+        tokenInfo.balance = afterBalance;
 
-        emit DepositToMerge(_sourceToken, address(mergeToken), msg.sender, _amount, _receiver);
+        address mergeToken = tokenInfo.mergeToken;
+        IERC20MergeToken(mergeToken).mint(_receiver, _amount);
+
+        emit DepositToMerge(_sourceToken, mergeToken, msg.sender, _amount, _receiver);
     }
 
     /// @notice Burn merge token and get source token back
-    function withdraw(address _sourceToken, uint256 _amount, address _sender) external override {
-        require(_amount > 0, "amount is 0");
+    function withdraw(address _sourceToken, uint256 _amount, address _receiver) external override nonReentrant {
+        require(_amount > 0, "ae0");
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
-        require(tokenInfo.isSupported == true, "not the token");
+        require(tokenInfo.isSupported == true, "ns");
 
-        require(tokenInfo.balance >= _amount, "insufficient balance");
-        tokenInfo.balance -= _amount;
-        sourceTokenInfoMap[_sourceToken] = tokenInfo;
-        IERC20MergeToken mergeToken = IERC20MergeToken(mergeTokenMap[_sourceToken]);
-        mergeToken.burn(_sender, _amount);
+        require(tokenInfo.balance >= _amount, "ib");
+        unchecked {
+            tokenInfo.balance -= _amount;
+        }
 
-        IERC20Upgradeable(_sourceToken).safeTransfer(_sender, _amount);
+        address mergeToken = tokenInfo.mergeToken;
+        IERC20MergeToken(mergeToken).burn(msg.sender, _amount);
 
-        emit WithdrawFromMerge(_sourceToken, address(mergeToken), _sender, _amount, _sender);
+        IERC20Upgradeable(_sourceToken).safeTransfer(_receiver, _amount);
+
+        emit WithdrawFromMerge(_sourceToken, mergeToken, msg.sender, _amount, _receiver);
     }
 
+    /// @notice Add source token
     function addSourceToken(address _sourceToken, address _mergeToken) external onlyGovernance {
-        require(_sourceToken != address(0) && _mergeToken != address(0), "MergeTokenManager: invalid source token");
-        mergeTokenMap[_sourceToken] = _mergeToken;
+        require(_sourceToken != address(0) && _mergeToken != address(0), "id");
         sourceTokenInfoMap[_sourceToken] = SourceTokenInfo({
             isSupported: true,
             isLocked: false,
+            mergeToken: _mergeToken,
             balance: 0,
             depositLimit: MAX_UINT256
         });
@@ -97,31 +102,31 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable {
         emit SourceTokenAdded(_sourceToken, _mergeToken, MAX_UINT256);
     }
 
+    /// @notice Remove source token
     function removeSourceToken(address _sourceToken) external onlyGovernance {
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
-        require(tokenInfo.balance == 0, "MergeTokenManager: token balance is not 0");
-        delete mergeTokenMap[_sourceToken];
+        require(tokenInfo.balance == 0, "bn0");
         delete sourceTokenInfoMap[_sourceToken];
 
         emit SourceTokenRemoved(_sourceToken);
     }
 
+    /// @notice Lock source token
     function disableDeposit(address _sourceToken) external onlyGovernance {
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
-        bool isSupported = tokenInfo.isSupported;
-        require(isSupported == true, "MergeTokenManager: token is not supported");
+        require(tokenInfo.isSupported == true, "ns");
+
         tokenInfo.isLocked = true;
-        sourceTokenInfoMap[_sourceToken] = tokenInfo;
 
         emit SourceTokenLocked(_sourceToken, true);
     }
 
+    /// @notice Set deposit limit
     function setDepositLimit(address _sourceToken, uint256 _limit) external onlyGovernance {
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
-        bool isSupported = tokenInfo.isSupported;
-        require(isSupported == true, "MergeTokenManager: token is not supported");
+        require(tokenInfo.isSupported == true, "ns");
+
         tokenInfo.depositLimit = _limit;
-        sourceTokenInfoMap[_sourceToken] = tokenInfo;
 
         emit DepositLimitUpdated(_sourceToken, _limit);
     }

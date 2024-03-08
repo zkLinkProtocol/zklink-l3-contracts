@@ -34,16 +34,10 @@ interface IMergeTokenPortal {
     struct SourceTokenInfo {
         bool isSupported;
         bool isLocked;
+        address mergeToken;
         uint256 balance;
         uint256 depositLimit;
     }
-
-    /**
-     * @notice Get merge token address
-     * @param _sourceToken Source token address
-     * @return Merge token address
-     */
-    function getMergeTokenAddress(address _sourceToken) external view returns (address);
 
     /**
      * @notice Get source token info
@@ -64,7 +58,7 @@ interface IMergeTokenPortal {
      * @notice Burn merge token and get source token back
      * @param _sourceToken Source token address
      * @param _amount Withdraw amount
-     * @param _sender Sender address
+     * @param _receiver Recceiver address
      */
-    function withdraw(address _sourceToken, uint256 _amount, address _sender) external;
+    function withdraw(address _sourceToken, uint256 _amount, address _receiver) external;
 }
