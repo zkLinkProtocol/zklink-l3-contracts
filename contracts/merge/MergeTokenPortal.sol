@@ -15,13 +15,13 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
     uint256 public constant MAX_UINT256 = type(uint256).max;
 
     /// @dev Governance address
-    address public immutable governance;
+    address public immutable GOVERNANCE;
 
     /// @dev A mapping source token address => source token status.
     mapping(address sourceToken => SourceTokenInfo) public sourceTokenInfoMap;
 
     modifier onlyGovernance() {
-        require(msg.sender == governance, "MergeTokenPortal: forbidden");
+        require(msg.sender == GOVERNANCE, "MergeTokenPortal: forbidden");
         _;
     }
 
@@ -30,7 +30,7 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
     constructor(address _governance) {
         _disableInitializers();
 
-        governance = _governance;
+        GOVERNANCE = _governance;
     }
 
     /// @notice Initializes the portal contract.
