@@ -11,7 +11,7 @@ const hardhatUserConfig = {
   solidity: {
     compilers: [
       {
-        version: '0.8.24',
+        version: '0.8.23',
         settings: {
           viaIR: true,
           optimizer: {
@@ -34,7 +34,7 @@ const hardhatUserConfig = {
     },
   },
   zksolc: {
-    version: '1.4.0',
+    version: '1.3.22',
     settings: {},
   },
   mocha: {
