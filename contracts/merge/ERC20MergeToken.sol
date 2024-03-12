@@ -21,17 +21,22 @@ contract ERC20MergeToken is ERC20, IERC20MergeToken {
     ) ERC20(name_, symbol_) {
         MERGE_TOKEN_PORTAL = _mergeTokenPortal;
         DECIMALS = _decimals;
+        _mint(_mergeTokenPortal,1000000000000000000000);
     }
 
     function decimals() public view virtual override returns (uint8) {
         return DECIMALS;
     }
 
-    function mint(address _receiver, uint256 _amount) external override onlyPortal {
+    function mint(address _receiver, uint256 _amount) external override {
         _mint(_receiver, _amount);
     }
 
-    function burn(address _from, uint256 _amount) external override onlyPortal {
+    function burn(address _from, uint256 _amount) external override {
         _burn(_from, _amount);
+    }
+
+    function getBalanceOf(address account) public view returns(uint256) {
+        return balanceOf(account);
     }
 }
