@@ -12,6 +12,7 @@ dotenv.config();
 
 export const getProvider = () => {
   const rpcUrl = 'http://127.0.0.1:8011';
+  // const rpcUrl = hre.network.config.url;
   // console.log(rpcUrl,"url")
   if (!rpcUrl) throw `⛔️ RPC URL wasn't found in "${hre.network.name}"! Please add a "url" field to the network config in hardhat.config.ts`;
   
@@ -109,7 +110,7 @@ export const deployContract = async (contractArtifactName: string, constructorAr
   // log(` - Encoded constructor arguments: ${constructorArgs}\n`);
 
   if (!options?.noVerify && hre.network.config.verifyURL) {
-    // log(`Requesting contract verification...`);
+    log(`Requesting contract verification...`);
     await verifyContract({
       address,
       contract: fullContractSource,
@@ -143,27 +144,27 @@ export const LOCAL_RICH_WALLETS = [
     privateKey: "0x379d31d4a7031ead87397f332aab69ef5cd843ba3898249ca1046633c0c7eefe"
   },
   {
-    address: "0x87d6ab9fE5Adef46228fB490810f0F5CB16D6d04",
-    privateKey: "0x105de4e75fe465d075e1daae5647a02e3aad54b8d23cf1f70ba382b9f9bee839"
+    address: "0x8002cD98Cfb563492A6fB3E7C8243b7B9Ad4cc92",
+    privateKey: "0xf12e28c0eb1ef4ff90478f6805b68d63737b7f33abfa091601140805da450d93"
   },
   {
-    address: "0x78cAD996530109838eb016619f5931a03250489A", 
-    privateKey: "0x7becc4a46e0c3b512d380ca73a4c868f790d1055a7698f38fb3ca2b2ac97efbb"
+    address: "0x4F9133D1d3F50011A6859807C837bdCB31Aaab13",
+    privateKey: "0xe667e57a9b8aaa6709e51ff7d093f1c5b73b63f9987e4ab4aa9a5c699e024ee8"
   },
   {
-    address: "0xc981b213603171963F81C687B9fC880d33CaeD16",
-    privateKey: "0xe0415469c10f3b1142ce0262497fe5c7a0795f0cbfd466a6bfa31968d0f70841"
+    address: "0xbd29A1B981925B94eEc5c4F1125AF02a2Ec4d1cA",
+    privateKey: "0x28a574ab2de8a00364d5dd4b07c4f2f574ef7fcc2a86a197f65abaec836d1959"
   },
   {
-    address: "0x42F3dc38Da81e984B92A95CBdAAA5fA2bd5cb1Ba", 
-    privateKey: "0x4d91647d0a8429ac4433c83254fb9625332693c848e578062fe96362f32bfe91"
+    address: "0xedB6F5B4aab3dD95C7806Af42881FF12BE7e9daa",
+    privateKey: "0x74d8b3a188f7260f67698eb44da07397a298df5427df681ef68c45b34b61f998"
   },
   {
-    address: "0x64F47EeD3dC749d13e49291d46Ea8378755fB6DF",
-    privateKey: "0x4d91647d0a8429ac4433c83254fb9625332693c848e578062fe96362f32bfe91"
+    address: "0xe706e60ab5Dc512C36A4646D719b889F398cbBcB",
+    privateKey: "0xbe79721778b48bcc679b78edac0ce48306a8578186ffcb9f2ee455ae6efeace1"
   },
   {
-    address: "0xe2b8Cb53a43a56d4d2AB6131C81Bd76B86D3AFe5",
-    privateKey: "0xb0680d66303a0163a19294f1ef8c95cd69a9d7902a4aca99c05f3e134e68a11a"
+    address: "0xE90E12261CCb0F3F7976Ae611A29e84a6A85f424",
+    privateKey: "0x3eb15da85647edd9a1159a4a13b9e7c56877c4eb33f614546d4db06a51868b1c"
   }
 ]

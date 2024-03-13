@@ -11,26 +11,14 @@ import {IERC20MergeToken} from "../interfaces/IERC20MergeToken.sol";
 
 contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
-    /// @dev MAX_UINT256
-    uint256 public constant MAX_UINT256 = type(uint256).max;
-
-    /// @dev Governance address
-    address public immutable GOVERNANCE;
 
     /// @dev A mapping source token address => source token status.
     mapping(address sourceToken => SourceTokenInfo) public sourceTokenInfoMap;
 
-    modifier onlyGovernance() {
-        require(msg.sender == GOVERNANCE, "MergeTokenPortal: forbidden");
-        _;
-    }
-
     /// @dev Contract is expected to be used as proxy implementation.
     /// @dev Disable the initialization to prevent Parity hack.
-    constructor(address _governance) {
-        //_disableInitializers();
-
-        GOVERNANCE = _governance;
+    constructor() {
+        // _disableInitializers();
     }
 
     /// @notice Initializes the portal contract.
@@ -49,20 +37,16 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
 
     /// @notice Deposit source token to mint merge token
     function deposit(address _sourceToken, uint256 _amount, address _receiver) external override nonReentrant {
-        require(_amount > 0, "ae0");
+        require(_amount > 0, "Deposit amount is zero");
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
-        require(tokenInfo.isSupported == true, "ns");
-        require(tokenInfo.isLocked == false, "dd");
+        require(tokenInfo.isSupported, "Source token is not supported");
+        require(!tokenInfo.isLocked, "Source token is locked");
 
-        uint256 afterBalance;
-        unchecked {
-            afterBalance = tokenInfo.balance + _amount;
-        }
-        require(afterBalance <= tokenInfo.depositLimit, "el");
-        //IERC20Upgradeable(_sourceToken).approve(address(this),_amount);
-        IERC20Upgradeable(_sourceToken).approve(address(this), _amount);
-        IERC20Upgradeable(_sourceToken).safeTransferFrom(msg.sender, address(this), _amount);
+        uint256 afterBalance = tokenInfo.balance + _amount;
+        require(afterBalance <= tokenInfo.depositLimit, "Source token deposit limit exceeded");
         tokenInfo.balance = afterBalance;
+
+        IERC20Upgradeable(_sourceToken).safeTransferFrom(msg.sender, address(this), _amount);
 
         address mergeToken = tokenInfo.mergeToken;
         IERC20MergeToken(mergeToken).mint(_receiver, _amount);
@@ -72,11 +56,11 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
 
     /// @notice Burn merge token and get source token back
     function withdraw(address _sourceToken, uint256 _amount, address _receiver) external override nonReentrant {
-        require(_amount > 0, "ae0");
+        require(_amount > 0, "Withdraw amount is zero");
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
-        require(tokenInfo.isSupported == true, "ns");
+        require(tokenInfo.isSupported, "Source token is not supported");
 
-        require(tokenInfo.balance >= _amount, "ib");
+        require(tokenInfo.balance >= _amount, "Source Token balance is not enough");
         unchecked {
             tokenInfo.balance -= _amount;
         }
@@ -90,41 +74,42 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
     }
 
     /// @notice Add source token
-    function addSourceToken(address _sourceToken, address _mergeToken, uint256 limit) external onlyGovernance {
-        require(_sourceToken != address(0) && _mergeToken != address(0), "id");
+    function addSourceToken(address _sourceToken, address _mergeToken, uint256 _depositLimit) external onlyOwner {
+        require(_sourceToken != address(0) && _mergeToken != address(0), "Invalid token address");
         sourceTokenInfoMap[_sourceToken] = SourceTokenInfo({
             isSupported: true,
             isLocked: false,
             mergeToken: _mergeToken,
             balance: 0,
-            depositLimit: limit
+            depositLimit: _depositLimit
         });
 
-        emit SourceTokenAdded(_sourceToken, _mergeToken, MAX_UINT256);
+        emit SourceTokenAdded(_sourceToken, _mergeToken, _depositLimit);
     }
 
     /// @notice Remove source token
-    function removeSourceToken(address _sourceToken) external onlyGovernance {
+    function removeSourceToken(address _sourceToken) external onlyOwner {
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
-        require(tokenInfo.balance == 0, "bn0");
+        require(tokenInfo.balance == 0, "Source Token balance is not zero");
         delete sourceTokenInfoMap[_sourceToken];
 
         emit SourceTokenRemoved(_sourceToken);
     }
 
     /// @notice Lock source token
-    function disableDeposit(address _sourceToken) external onlyGovernance {
+    function updateDepositStatus(address _sourceToken, bool _isLocked) external onlyOwner {
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
-        require(tokenInfo.isSupported == true, "ns");
+        require(tokenInfo.isSupported, "Source token is not supported");
 
-        tokenInfo.isLocked = true;
-        emit SourceTokenLocked(_sourceToken, true);
+        tokenInfo.isLocked = _isLocked;
+
+        emit SourceTokenLocked(_sourceToken, _isLocked);
     }
 
     /// @notice Set deposit limit
-    function setDepositLimit(address _sourceToken, uint256 _limit) external onlyGovernance {
+    function setDepositLimit(address _sourceToken, uint256 _limit) external onlyOwner {
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
-        require(tokenInfo.isSupported == true, "ns");
+        require(tokenInfo.isSupported, "Source token is not supported");
 
         tokenInfo.depositLimit = _limit;
 

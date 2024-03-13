@@ -6,7 +6,7 @@ import "@matterlabs/hardhat-zksync-solc";
 import "@matterlabs/hardhat-zksync-verify";
 import "@nomiclabs/hardhat-waffle"
 import "@matterlabs/hardhat-zksync-chai-matchers";
-
+require('solidity-coverage')
 const config: HardhatUserConfig = {
   defaultNetwork: "zkSyncSepoliaTestnet",
   networks: {
