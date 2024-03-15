@@ -1,7 +1,40 @@
 {
-  "name": "hardhat-project",
+  "name": "zklink-l3-contracts",
+  "version": "1.0.0",
+  "license": "MIT",
+  "homepage": "https://zk.link",
+  "keywords": [
+    "zklink",
+    "zkevm-rollup",
+    "cross chain"
+  ],
   "devDependencies": {
+    "@matterlabs/hardhat-zksync-deploy": "^1.1.1",
+    "@matterlabs/hardhat-zksync-solc": "^1.0.3",
+    "@matterlabs/hardhat-zksync-upgradable": "^1.2.1",
+    "@matterlabs/hardhat-zksync-verify": "^1.2.0",
+    "@nomicfoundation/hardhat-ethers": "^3.0.5",
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
-    "hardhat": "^2.22.1"
+    "hardhat": "^2.22.1",
+    "zksync-ethers": "^6.0.0",
+    "prettier": "^3.0.0",
+    "prettier-plugin-solidity": "^1.1.0",
+    "solhint": "^4.1.1",
+    "eslint": "^8.30.0",
+    "eslint-config-prettier": "^9.0.0"
+  },
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "test": "npx hardhat test",
+    "lint": "npm run lint:js && npm run lint:sol",
+    "lint:fix": "npm run lint:js:fix && npm run lint:sol:fix",
+    "lint:js": "prettier --log-level warn --ignore-path .gitignore '**/*.{js,ts}' --check && eslint --ignore-path .gitignore .",
+    "lint:js:fix": "prettier --log-level warn --ignore-path .gitignore '**/*.{js,ts}' --write && eslint --ignore-path .gitignore . --fix",
+    "lint:sol": "prettier --log-level warn --ignore-path .gitignore 'contracts/**/*.sol' --check && solhint 'contracts/**/*.sol'",
+    "lint:sol:fix": "prettier --log-level warn --ignore-path .gitignore 'contracts/**/*.sol' --write"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^4.9.5",
+    "@openzeppelin/contracts-upgradeable": "^4.9.5"
   }
 }
