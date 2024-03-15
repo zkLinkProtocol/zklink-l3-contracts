@@ -1,7 +1,5 @@
 require("@nomicfoundation/hardhat-toolbox");
-require('solidity-coverage');
-require('@nomiclabs/hardhat-ethers');
-// require('@openzeppelin/hardhat-upgrades');
+
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: {
