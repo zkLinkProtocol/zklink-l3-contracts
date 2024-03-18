@@ -8,6 +8,8 @@ tmp
 # Hardhat files
 cache-zk
 artifacts-zk
+cache
+artifacts
 
 # Openzeppelin upgrade
 .upgradable

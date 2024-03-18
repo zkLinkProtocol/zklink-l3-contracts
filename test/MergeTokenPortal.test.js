@@ -1,7 +1,6 @@
-const { expect, assert } = require('chai');
-const hre = require("hardhat")
-const { ethers } = require("hardhat")
-// const { upgrades } = require('hardhat')
+const { expect } = require('chai');
+const hre = require("hardhat");
+const { ethers, upgrades } = require("hardhat");
 
 describe("MergeToeknPortal", function () {
     let mergeTokenPortal, erc2OSource0MergenToeken;
@@ -9,12 +8,15 @@ describe("MergeToeknPortal", function () {
 
     beforeEach(async function () {
         [owner, recipient, addr1, addr2, addr3] = await hre.ethers.getSigners()
-        //const MergeTokenPortalFactory = await ethers.getContractFactory("MergeTokenPortal");
+
         const MergeTokenPortal = await ethers.getContractFactory("MergeTokenPortal");
-   
-        // console.log("MergeTokenPortal Beacon Proxy deployed to:", proxy.address);
-        mergeTokenPortal = await MergeTokenPortal.deploy();
-        mergeTokenPortal.connect(owner).initialize();
+        mergeTokenPortal = await upgrades.deployProxy(MergeTokenPortal, [], {
+            kind: 'uups',
+            constructorArgs: [],
+            unsafeAllow: ['constructor'],
+            initializer: 'initialize'
+        });
+        await mergeTokenPortal.waitForDeployment();
         const ERC20SourceToeknFactory = await ethers.getContractFactory("ERC20MergeToken");
         erc2OSource0MergenToeken = await ERC20SourceToeknFactory.deploy(owner.address, "My Source Token", "MTK", 18);
     })

@@ -15,13 +15,13 @@
     "@matterlabs/hardhat-zksync-verify": "^1.2.0",
     "@nomicfoundation/hardhat-ethers": "^3.0.5",
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "eslint": "^8.30.0",
+    "eslint-config-prettier": "^9.0.0",
     "hardhat": "^2.22.1",
-    "zksync-ethers": "^6.0.0",
     "prettier": "^3.0.0",
     "prettier-plugin-solidity": "^1.1.0",
     "solhint": "^4.1.1",
-    "eslint": "^8.30.0",
-    "eslint-config-prettier": "^9.0.0"
+    "zksync-ethers": "^6.0.0"
   },
   "scripts": {
     "compile": "npx hardhat compile",
@@ -35,6 +35,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.9.5",
-    "@openzeppelin/contracts-upgradeable": "^4.9.5"
+    "@openzeppelin/contracts-upgradeable": "^4.9.5",
+    "@openzeppelin/hardhat-upgrades": "^3.0.5"
   }
 }
