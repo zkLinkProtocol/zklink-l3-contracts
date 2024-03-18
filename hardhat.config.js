@@ -4,11 +4,23 @@ require('@matterlabs/hardhat-zksync-deploy');
 require('@matterlabs/hardhat-zksync-solc');
 require('@matterlabs/hardhat-zksync-verify');
 require('@matterlabs/hardhat-zksync-upgradable');
+require('solidity-coverage');
+require('hardhat-abi-exporter');
+require('dotenv').config();
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
 const hardhatUserConfig = {
+  abiExporter: {
+    path: './abi',
+    runOnCompile: true,
+    clear: true,
+    flat: true,
+    spacing: 2,
+    only: ["contracts/.*\.sol"],
+    format: "json",
+  },
   solidity: {
     compilers: [
       {
@@ -23,14 +35,15 @@ const hardhatUserConfig = {
       },
     ],
   },
+  defaultNetwork: process.env.DEFAULT_NETWORK || 'hardhat',
   networks: {
     hardhat: {
-      zksync: true,
+      zksync: false,
     },
-    zklinkSepoliaTest: {
-      url: 'https://sepolia.rpc.zklink.network',
-      ethNetwork: 'https://sepolia-rollup.arbitrum.io/rpc',
-      verifyURL: 'https://sepolia.verification.zklink.network/contract_verification',
+    zklinkGoerli: {
+      url: 'https://goerli.rpc.zklink.io',
+      ethNetwork: 'goerli',
+      verifyURL: 'https://goerli.explorer.zklink.io/contract_verification',
       zksync: true,
     },
   },
