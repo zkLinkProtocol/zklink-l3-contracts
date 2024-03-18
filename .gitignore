@@ -6,7 +6,7 @@ log
 tmp
 
 .env
-
+abi
 # Hardhat files
 cache-zk
 artifacts-zk
