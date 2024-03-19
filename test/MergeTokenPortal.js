@@ -58,7 +58,7 @@ describe("MergeToeknPortal", function () {
             erc20MergeAddr2Token = await ERC20TokenFactory.deploy(mergeTokenPortal.target, "addr2", "ADD2TK", 18);
         });
         it("Should add source token correctly", async function () {
-            const tx = await mergeTokenPortal.connect(owner).addSourceToken(owner.address, recipient.address, 100);
+            await mergeTokenPortal.connect(owner).addSourceToken(owner.address, recipient.address, 100);
             let sourceTokenInfo = await mergeTokenPortal.connect(owner).getSourceTokenInfos(owner.address);
             expect(sourceTokenInfo.isSupported).to.equal(true);
             expect(sourceTokenInfo.isLocked).to.equal(false);
@@ -67,11 +67,36 @@ describe("MergeToeknPortal", function () {
             expect(sourceTokenInfo.depositLimit).to.equal(100n);
         });
 
+        it("Should add source token correctly2", async function () {
+            await mergeTokenPortal.connect(owner).addSourceToken(owner.address, recipient.address, 100);
+            await mergeTokenPortal.removeSourceToken(owner.address);
+            await mergeTokenPortal.connect(owner).addSourceToken(owner.address, recipient.address, 1000);
+            let sourceTokenInfo = await mergeTokenPortal.connect(owner).getSourceTokenInfos(owner.address);
+            expect(sourceTokenInfo.isSupported).to.equal(true);
+            expect(sourceTokenInfo.isLocked).to.equal(false);
+            expect(sourceTokenInfo.mergeToken).to.equal(recipient.address);
+            expect(sourceTokenInfo.balance).to.equal(0n);
+            expect(sourceTokenInfo.depositLimit).to.equal(1000n);
+        });
+
         it("Should bot add source token if Invalid token address", async function () {
             await expect(mergeTokenPortal.connect(owner).addSourceToken("0x0000000000000000000000000000000000000000", recipient.address, 100)).to.be.revertedWith("Invalid token address");
         });
 
         it("Should remove a source token", async function () {
+            const tx = await mergeTokenPortal.connect(owner).addSourceToken(owner.address, recipient.address, 100);
+            await mergeTokenPortal.connect(owner).removeSourceToken(owner.address);
+            let sourceTokenInfo = await mergeTokenPortal.getSourceTokenInfos(owner.address);
+            expect(sourceTokenInfo.isSupported).to.equal(false);
+            expect(sourceTokenInfo.isLocked).to.equal(false);
+            expect(sourceTokenInfo.balance).to.equal(0n);
+            expect(sourceTokenInfo.depositLimit).to.equal(0n);
+        });
+
+        it("Should remove a source token2", async function () {
+            const tx = await mergeTokenPortal.connect(owner).addSourceToken(owner.address, recipient.address, 100);
+            await mergeTokenPortal.connect(owner).removeSourceToken(owner.address);
+            await mergeTokenPortal.connect(owner).addSourceToken(owner.address, recipient.address, 100);
             await mergeTokenPortal.connect(owner).removeSourceToken(owner.address);
             let sourceTokenInfo = await mergeTokenPortal.getSourceTokenInfos(owner.address);
             expect(sourceTokenInfo.isSupported).to.equal(false);
@@ -105,7 +130,8 @@ describe("MergeToeknPortal", function () {
 
         it("Should mint tokens correctly", async function () {
             await erc2OSource0MergenToeken.connect(owner).mint(recipient.address, 100);
-            await expect(await erc2OSource0MergenToeken.balanceOf(recipient.address)).to.equal(100n);
+            await erc2OSource0MergenToeken.connect(owner).burn(recipient.address, 10);
+            await expect(await erc2OSource0MergenToeken.balanceOf(recipient.address)).to.equal(90n);
         });
 
         it("Should burn tokens correctly", async function () {
@@ -174,6 +200,25 @@ describe("MergeToeknPortal", function () {
             expect(sourceTokenInfo.balance).to.equal(10n);
         });
 
+        it("Should deposit correctly2", async function () {
+            await mergeTokenPortal.connect(owner).addSourceToken(erc20MergeAddr1Token.target, erc20MergeAddr2Token.target, 10000);
+            await erc20MergeAddr1Token.connect(addr2).approve(mergeTokenPortal.target, 10000);
+            await erc20MergeAddr1Token.connect(addr1).mint(addr2.address, 10000);
+            await mergeTokenPortal.connect(addr2).deposit(erc20MergeAddr1Token.target, 1000, addr1.address);
+            await mergeTokenPortal.connect(addr1).withdraw(erc20MergeAddr1Token.target, 500, addr2.address);
+            await mergeTokenPortal.connect(addr2).deposit(erc20MergeAddr1Token.target, 1000, addr1.address);
+            let sourceTokenInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token.target);
+            const balance1 = await erc20MergeAddr1Token.connect(addr1).balanceOf(addr1);
+            const balance2 = await erc20MergeAddr1Token.connect(addr1).balanceOf(addr2);
+            const balance3 = await erc20MergeAddr2Token.connect(addr1).balanceOf(addr2);
+            const balance4 = await erc20MergeAddr2Token.connect(addr1).balanceOf(addr1);
+            expect(balance1).to.equal(0n);
+            expect(balance2).to.equal(8500n);
+            expect(balance3).to.equal(0n);
+            expect(balance4).to.equal(1500n);
+            expect(sourceTokenInfo.balance).to.equal(1500n);
+        });
+
         it("Should not deposit if Source token is not supported", async function () {
             await erc20MergeAddr1Token.connect(addr2).approve(mergeTokenPortal.target, 1000);
             await erc20MergeAddr1Token.connect(addr1).approve(mergeTokenPortal.target, 1000);
@@ -181,8 +226,12 @@ describe("MergeToeknPortal", function () {
             await erc20MergeAddr1Token.connect(addr1).mint(addr1.address, 100);
             const balance1 = await erc20MergeAddr1Token.connect(addr1).balanceOf(addr1);
             const balance2 = await erc20MergeAddr1Token.connect(addr1).balanceOf(addr2);
+            const balance3 = await erc20MergeAddr2Token.connect(addr1).balanceOf(addr2);
+            const balance4 = await erc20MergeAddr2Token.connect(addr1).balanceOf(addr1);
             expect(balance1).to.equal(100n);
             expect(balance2).to.equal(100n);
+            expect(balance3).to.equal(0n);
+            expect(balance4).to.equal(0n);
             await expect(mergeTokenPortal.connect(owner).deposit(erc20MergeAddr1Token.target, 10, addr1.address)).to.be.revertedWith("Source token is not supported");
         });
 
@@ -263,6 +312,26 @@ describe("MergeToeknPortal", function () {
             expect(sourceTokenInfo.balance).to.equal(500);
         });
 
+        it("Should allow withdrawal correctly2", async function () {
+            await mergeTokenPortal.connect(owner).addSourceToken(erc20MergeAddr1Token.target, erc20MergeAddr2Token.target, 10000);
+            await erc20MergeAddr1Token.connect(addr2).approve(mergeTokenPortal.target, 10000);
+            await erc20MergeAddr1Token.connect(addr1).mint(addr2.address, 10000);
+            await mergeTokenPortal.connect(addr2).deposit(erc20MergeAddr1Token.target, 1000, addr1.address);
+            await mergeTokenPortal.connect(addr1).withdraw(erc20MergeAddr1Token.target, 500, addr2.address);
+            await mergeTokenPortal.connect(addr2).deposit(erc20MergeAddr1Token.target, 1000, addr1.address);
+            await mergeTokenPortal.connect(addr1).withdraw(erc20MergeAddr1Token.target, 500, addr2.address);
+            let sourceTokenInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token.target);
+            const balance1 = await erc20MergeAddr1Token.connect(addr1).balanceOf(addr1);
+            const balance2 = await erc20MergeAddr1Token.connect(addr1).balanceOf(addr2);
+            const balance3 = await erc20MergeAddr2Token.connect(addr1).balanceOf(addr1);
+            const balance4 = await erc20MergeAddr2Token.connect(addr1).balanceOf(addr2);
+            expect(balance1).to.equal(0n);
+            expect(balance2).to.equal(9000n);
+            expect(balance3).to.equal(1000n);
+            expect(balance4).to.equal(0n);
+            expect(sourceTokenInfo.balance).to.equal(1000);
+        });
+
 
         it("Should not allow withdrawal if Source Token balance is not enough", async function () {
             await mergeTokenPortal.connect(owner).addSourceToken(erc20MergeAddr1Token.target, erc20MergeAddr2Token.target, 10000);
@@ -277,7 +346,9 @@ describe("MergeToeknPortal", function () {
             await erc20MergeAddr1Token.connect(addr2).approve(mergeTokenPortal.target, 1000);
             await erc20MergeAddr1Token.connect(addr1).mint(addr2.address, 10000);
             await mergeTokenPortal.connect(addr2).deposit(erc20MergeAddr1Token.target, 1000, addr1.address);
-            expect(mergeTokenPortal.connect(recipient).withdraw(erc20MergeAddr1Token.target, 1500, owner.address)).to.be.revertedWith("ib");//With("ib"))
+            // console.log(await mergeTokenPortal.connect(recipient).withdraw(erc20MergeAddr1Token.target, 1500, owner.address));
+            await expect(mergeTokenPortal.connect(recipient).withdraw(erc20MergeAddr1Token.target, 1500, owner.address)).to.be.revertedWith("Source Token balance is not enough");//With("ib"))
+            // expect(await mergeTokenPortal.connect(recipient).withdraw(erc20MergeAddr1Token.target, 1500, owner.address)).to.be.reverted("Source Token balance is not enough");//With("ib"))
         });
 
         it("Should not allow withdrawal if Withdraw amount is zero", async function () {
