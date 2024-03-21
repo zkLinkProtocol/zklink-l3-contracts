@@ -18,8 +18,8 @@ const hardhatUserConfig = {
     clear: true,
     flat: true,
     spacing: 2,
-    only: ["contracts/.*\.sol"],
-    format: "json",
+    only: ['contracts/.*.sol'],
+    format: 'json',
   },
   solidity: {
     compilers: [
