@@ -5,9 +5,15 @@ node_modules
 log
 tmp
 
+.env
+abi
 # Hardhat files
 cache-zk
 artifacts-zk
+cache
+artifacts
+coverage
+coverage.json
 
 # Openzeppelin upgrade
 .upgradable

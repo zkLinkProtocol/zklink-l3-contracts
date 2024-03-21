@@ -75,6 +75,8 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
 
     /// @notice Add source token
     function addSourceToken(address _sourceToken, address _mergeToken, uint256 _depositLimit) external onlyOwner {
+        SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
+        require(!tokenInfo.isSupported, "Source token is already supported");
         require(_sourceToken != address(0) && _mergeToken != address(0), "Invalid token address");
         sourceTokenInfoMap[_sourceToken] = SourceTokenInfo({
             isSupported: true,

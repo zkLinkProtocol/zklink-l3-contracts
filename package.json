@@ -2,7 +2,7 @@
   "name": "zklink-l3-contracts",
   "version": "1.0.0",
   "license": "MIT",
-  "homepage": "https://zk.link",
+  "homepage": "https://zklink.io",
   "keywords": [
     "zklink",
     "zkevm-rollup",
@@ -13,18 +13,24 @@
     "@matterlabs/hardhat-zksync-solc": "^1.0.3",
     "@matterlabs/hardhat-zksync-upgradable": "^1.2.1",
     "@matterlabs/hardhat-zksync-verify": "^1.2.0",
-    "@nomicfoundation/hardhat-ethers": "^3.0.5",
-    "hardhat": "^2.19.3",
-    "zksync-ethers": "^6.0.0",
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "dotenv": "^16.4.5",
+    "eslint": "^8.30.0",
+    "eslint-config-prettier": "^9.0.0",
+    "hardhat": "^2.22.1",
+    "hardhat-abi-exporter": "^2.10.1",
+    "hardhat-gas-reporter": "^1.0.10",
     "prettier": "^3.0.0",
     "prettier-plugin-solidity": "^1.1.0",
     "solhint": "^4.1.1",
-    "eslint": "^8.30.0",
-    "eslint-config-prettier": "^9.0.0"
+    "solidity-coverage": "^0.8.11",
+    "zksync-ethers": "^6.0.0"
   },
   "scripts": {
     "compile": "npx hardhat compile",
-    "test": "npx hardhat test",
+    "test": "DEFAULT_NETWORK=hardhat npx hardhat test",
+    "coverage": "DEFAULT_NETWORK=hardhat npx hardhat coverage",
+    "export-abi": "npx hardhat export-abi",
     "lint": "npm run lint:js && npm run lint:sol",
     "lint:fix": "npm run lint:js:fix && npm run lint:sol:fix",
     "lint:js": "prettier --log-level warn --ignore-path .gitignore '**/*.{js,ts}' --check && eslint --ignore-path .gitignore .",
@@ -34,6 +40,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.9.5",
-    "@openzeppelin/contracts-upgradeable": "^4.9.5"
+    "@openzeppelin/contracts-upgradeable": "^4.9.5",
+    "@openzeppelin/hardhat-upgrades": "^3.0.5"
   }
 }
