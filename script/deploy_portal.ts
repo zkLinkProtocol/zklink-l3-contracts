@@ -8,7 +8,7 @@ import {
   readDeployContract,
 } from './utils';
 import {
-  DEPLOY_PORTAL_LOG,
+  DEPLOY_PORTAL_LOG_PREFIX,
   DEPLOY_LOG_DEPLOYER,
   DEPLOY_LOG_PORTAL_TARGET,
   DEPLOY_LOG_PORTAL_TARGET_VERIFIED,
@@ -37,14 +37,14 @@ task('deployPortal', 'Deploy portal')
     await contractDeployer.init();
     const deployerWallet = contractDeployer.deployerWallet;
 
-    const { deployLogPath, deployLog } = createOrGetDeployLog(DEPLOY_PORTAL_LOG, hardhat.network.name);
+    const { deployLogPath, deployLog } = createOrGetDeployLog(DEPLOY_PORTAL_LOG_PREFIX, hardhat.network.name);
     const dLog = deployLog as any;
     dLog[DEPLOY_LOG_DEPLOYER] = await deployerWallet?.getAddress();
     fs.writeFileSync(deployLogPath, JSON.stringify(dLog, null, 2));
 
     // deploy portal
     let portalAddr;
-    if (!(DEPLOY_PORTAL_LOG in dLog)) {
+    if (!(DEPLOY_LOG_PORTAL_PROXY in dLog)) {
       console.log('deploy portal...');
       const contractName = getPortalContractName();
       const contract = await contractDeployer.deployProxy(contractName, [], {
@@ -93,7 +93,7 @@ task('upgradePortal', 'Upgrade portal')
     let skipVerify = taskArgs.skipVerify;
     console.log('skipVerify', skipVerify);
 
-    const { deployLogPath, deployLog } = createOrGetDeployLog(DEPLOY_PORTAL_LOG, hardhat.network.name);
+    const { deployLogPath, deployLog } = createOrGetDeployLog(DEPLOY_PORTAL_LOG_PREFIX, hardhat.network.name);
     const dLog = deployLog as any;
     const contractAddr = dLog[DEPLOY_LOG_PORTAL_PROXY];
     if (contractAddr === undefined) {
@@ -141,7 +141,7 @@ task('deployPortalTarget', 'Deploy portal target')
     await contractDeployer.init();
     const deployerWallet = contractDeployer.deployerWallet;
 
-    const { deployLogPath, deployLog } = createOrGetDeployLog(DEPLOY_PORTAL_LOG, hardhat.network.name);
+    const { deployLogPath, deployLog } = createOrGetDeployLog(DEPLOY_PORTAL_LOG_PREFIX, hardhat.network.name);
     const dLog = deployLog as any;
     dLog[DEPLOY_LOG_DEPLOYER] = await deployerWallet?.getAddress();
     fs.writeFileSync(deployLogPath, JSON.stringify(dLog, null, 2));
@@ -180,7 +180,7 @@ task('encodeAddSourceToken', 'Get the calldata of add source token for portal')
     console.log('mergeToken', mergeToken);
     console.log('limit', limit);
     if (portal === undefined) {
-      portal = readDeployContract(DEPLOY_PORTAL_LOG, DEPLOY_LOG_PORTAL_PROXY, hre.network.name);
+      portal = readDeployContract(DEPLOY_PORTAL_LOG_PREFIX, DEPLOY_LOG_PORTAL_PROXY, hre.network.name);
     }
     console.log('portal address', portal);
 
@@ -208,7 +208,7 @@ task('encodeRemoveSourceToken', 'Get the calldata of remove source token for por
     let portal = taskArgs.portal;
     console.log('sourceToken', sourceToken);
     if (portal === undefined) {
-      portal = readDeployContract(DEPLOY_PORTAL_LOG, DEPLOY_LOG_PORTAL_PROXY, hre.network.name);
+      portal = readDeployContract(DEPLOY_PORTAL_LOG_PREFIX, DEPLOY_LOG_PORTAL_PROXY, hre.network.name);
     }
     console.log('portal address', portal);
 
@@ -230,7 +230,7 @@ task('encodeUpdateDepositStatus', 'Get the calldata of update deposit status for
     console.log('sourceToken', sourceToken);
     console.log('lock status', lock);
     if (portal === undefined) {
-      portal = readDeployContract(DEPLOY_PORTAL_LOG, DEPLOY_LOG_PORTAL_PROXY, hre.network.name);
+      portal = readDeployContract(DEPLOY_PORTAL_LOG_PREFIX, DEPLOY_LOG_PORTAL_PROXY, hre.network.name);
     }
     console.log('portal address', portal);
 
@@ -252,7 +252,7 @@ task('encodeUpdateDepositLimit', 'Get the calldata of update deposit limit for p
     console.log('sourceToken', sourceToken);
     console.log('limit', limit);
     if (portal === undefined) {
-      portal = readDeployContract(DEPLOY_PORTAL_LOG, DEPLOY_LOG_PORTAL_PROXY, hre.network.name);
+      portal = readDeployContract(DEPLOY_PORTAL_LOG_PREFIX, DEPLOY_LOG_PORTAL_PROXY, hre.network.name);
     }
     console.log('portal address', portal);
 

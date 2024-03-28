@@ -8,7 +8,7 @@ import {
 } from './utils';
 import {
   DEPLOY_LOG_DEPLOYER,
-  DEPLOY_PORTAL_LOG,
+  DEPLOY_PORTAL_LOG_PREFIX,
   DEPLOY_LOG_PORTAL_PROXY,
   DEPLOY_MERGETOKEN_LOG_PREFIX,
   DEPLOY_LOG_MERGETOKEN,
@@ -41,7 +41,7 @@ task('deployMergeToken', 'Deploy MergeToken')
 
     let portal = taskArgs.portal;
     if (portal === undefined) {
-      portal = readDeployContract(DEPLOY_PORTAL_LOG, DEPLOY_LOG_PORTAL_PROXY, hardhat.network.name);
+      portal = readDeployContract(DEPLOY_PORTAL_LOG_PREFIX, DEPLOY_LOG_PORTAL_PROXY, hardhat.network.name);
     }
     let skipVerify = taskArgs.skipVerify;
     console.log('skip verify contracts?', skipVerify);

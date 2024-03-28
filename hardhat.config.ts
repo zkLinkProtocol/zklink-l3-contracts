@@ -7,8 +7,11 @@ import '@matterlabs/hardhat-zksync-verify';
 import '@matterlabs/hardhat-zksync-upgradable';
 import 'solidity-coverage';
 import 'hardhat-abi-exporter';
+import * as dotenv from 'dotenv';
 import './script/deploy_portal';
 import './script/deploy_merge_token';
+
+dotenv.config();
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -41,6 +44,7 @@ const config: HardhatUserConfig = {
       },
     ],
   },
+  defaultNetwork: process.env.DEFAULT_NETWORK || 'hardhat',
   networks: {
     hardhat: {
       zksync: false,
@@ -50,14 +54,14 @@ const config: HardhatUserConfig = {
       ethNetwork: 'goerli',
       verifyURL: 'https://goerli.explorer.zklink.io/contract_verification',
       zksync: true,
-      accounts: ["0x0000000000000000000000000000000000000000000000000000000000000000"]
+      accounts: [process.env.WALLET_PRIVATE_KEY || ''],
     },
     zklinkNova: {
       url: 'https://rpc.zklink.io',
       ethNetwork: 'mainnet',
       verifyURL: 'https://explorer.zklink.io/contract_verification',
       zksync: true,
-      accounts: ["0x0000000000000000000000000000000000000000000000000000000000000000"]
+      accounts: [process.env.WALLET_PRIVATE_KEY || '']
     }
   },
   zksolc: {
