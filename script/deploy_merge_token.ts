@@ -30,7 +30,6 @@ task('deployMergeToken', 'Deploy MergeToken')
   .addParam('symbol', 'The merge token symbol', undefined, types.string, false)
   .addParam('decimals', 'The merge token decimals', undefined, types.int, false)
   .addParam('portal', 'The portal address (default get from portal deploy log)', undefined, types.string, true)
-  .addParam('force', 'Fore redeploy all contracts', false, types.boolean, true)
   .addParam('skipVerify', 'Skip verify', false, types.boolean, true)
   .setAction(async (taskArgs, hardhat) => {
     let name = taskArgs.name;
@@ -44,9 +43,7 @@ task('deployMergeToken', 'Deploy MergeToken')
     if (portal === undefined) {
       portal = readDeployContract(DEPLOY_PORTAL_LOG, DEPLOY_LOG_PORTAL_PROXY, hardhat.network.name);
     }
-    let force = taskArgs.force;
     let skipVerify = taskArgs.skipVerify;
-    console.log('force redeploy all contracts?', force);
     console.log('skip verify contracts?', skipVerify);
     console.log('portal address:', portal);
 
@@ -64,7 +61,7 @@ task('deployMergeToken', 'Deploy MergeToken')
 
     // deploy merge token
     let mergeTokenAddr;
-    if (!(DEPLOY_LOG_MERGETOKEN in dLog) || force) {
+    if (!(DEPLOY_LOG_MERGETOKEN in dLog)) {
       console.log('deploy merge token...');
       const contractName = getContractName();
       const contract = await contractDeployer.deployContract(contractName, [portal, name, symbol, decimals]);

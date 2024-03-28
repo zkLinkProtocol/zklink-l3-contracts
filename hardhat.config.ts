@@ -7,11 +7,8 @@ import '@matterlabs/hardhat-zksync-verify';
 import '@matterlabs/hardhat-zksync-upgradable';
 import 'solidity-coverage';
 import 'hardhat-abi-exporter';
-import * as dotenv from 'dotenv';
 import './script/deploy_portal';
 import './script/deploy_merge_token';
-
-dotenv.config();
 
 /**
  * @type import('hardhat/config').HardhatUserConfig

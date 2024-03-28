@@ -28,12 +28,9 @@ function getMergeTokenContractName() {
 }
 
 task('deployPortal', 'Deploy portal')
-  .addParam('force', 'Fore redeploy all contracts', false, types.boolean, true)
   .addParam('skipVerify', 'Skip verify', false, types.boolean, true)
   .setAction(async (taskArgs, hardhat) => {
-    let force = taskArgs.force;
     let skipVerify = taskArgs.skipVerify;
-    console.log('force redeploy all contracts?', force);
     console.log('skip verify contracts?', skipVerify);
 
     const contractDeployer = new ChainContractDeployer(hardhat);
@@ -47,7 +44,7 @@ task('deployPortal', 'Deploy portal')
 
     // deploy portal
     let portalAddr;
-    if (!(DEPLOY_PORTAL_LOG in dLog) || force) {
+    if (!(DEPLOY_PORTAL_LOG in dLog)) {
       console.log('deploy portal...');
       const contractName = getPortalContractName();
       const contract = await contractDeployer.deployProxy(contractName, [], {
@@ -65,7 +62,7 @@ task('deployPortal', 'Deploy portal')
     console.log('portal', portalAddr);
 
     let portalTargetAddr;
-    if (!(DEPLOY_LOG_PORTAL_TARGET in dLog) || force) {
+    if (!(DEPLOY_LOG_PORTAL_TARGET in dLog)) {
       console.log('get portal target...');
       portalTargetAddr = await getImplementationAddress(hardhat.ethers.provider, portalAddr);
       dLog[DEPLOY_LOG_PORTAL_TARGET] = portalTargetAddr;
@@ -76,14 +73,14 @@ task('deployPortal', 'Deploy portal')
     console.log('portal target', portalTargetAddr);
 
     // verify target contract
-    if ((!(DEPLOY_LOG_PORTAL_TARGET_VERIFIED in dLog) || force) && !skipVerify) {
+    if ((!(DEPLOY_LOG_PORTAL_TARGET_VERIFIED in dLog)) && !skipVerify) {
       await verifyContractCode(hardhat, portalTargetAddr, []);
       dLog[DEPLOY_LOG_PORTAL_TARGET_VERIFIED] = true;
       fs.writeFileSync(deployLogPath, JSON.stringify(dLog, null, 2));
     }
 
     // verify proxy contract
-    if ((!(DEPLOY_LOG_PORTAL_PROXY_VERIFIED in dLog) || force) && !skipVerify) {
+    if ((!(DEPLOY_LOG_PORTAL_PROXY_VERIFIED in dLog)) && !skipVerify) {
       await verifyContractCode(hardhat, portalAddr, []);
       dLog[DEPLOY_LOG_PORTAL_PROXY_VERIFIED] = true;
       fs.writeFileSync(deployLogPath, JSON.stringify(dLog, null, 2));
