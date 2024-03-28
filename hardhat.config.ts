@@ -50,14 +50,14 @@ const config: HardhatUserConfig = {
       ethNetwork: 'goerli',
       verifyURL: 'https://goerli.explorer.zklink.io/contract_verification',
       zksync: true,
-      accounts: ["YOUR_KEY"]
+      accounts: ["0x0000000000000000000000000000000000000000000000000000000000000000"]
     },
     zklinkNova: {
       url: 'https://rpc.zklink.io',
       ethNetwork: 'mainnet',
       verifyURL: 'https://explorer.zklink.io/contract_verification',
       zksync: true,
-      accounts: ["YOUR_KEY"]
+      accounts: ["0x0000000000000000000000000000000000000000000000000000000000000000"]
     }
   },
   zksolc: {
