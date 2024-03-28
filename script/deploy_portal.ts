@@ -73,14 +73,14 @@ task('deployPortal', 'Deploy portal')
     console.log('portal target', portalTargetAddr);
 
     // verify target contract
-    if ((!(DEPLOY_LOG_PORTAL_TARGET_VERIFIED in dLog)) && !skipVerify) {
+    if (!(DEPLOY_LOG_PORTAL_TARGET_VERIFIED in dLog) && !skipVerify) {
       await verifyContractCode(hardhat, portalTargetAddr, []);
       dLog[DEPLOY_LOG_PORTAL_TARGET_VERIFIED] = true;
       fs.writeFileSync(deployLogPath, JSON.stringify(dLog, null, 2));
     }
 
     // verify proxy contract
-    if ((!(DEPLOY_LOG_PORTAL_PROXY_VERIFIED in dLog)) && !skipVerify) {
+    if (!(DEPLOY_LOG_PORTAL_PROXY_VERIFIED in dLog) && !skipVerify) {
       await verifyContractCode(hardhat, portalAddr, []);
       dLog[DEPLOY_LOG_PORTAL_PROXY_VERIFIED] = true;
       fs.writeFileSync(deployLogPath, JSON.stringify(dLog, null, 2));
@@ -169,7 +169,7 @@ task('deployPortalTarget', 'Deploy portal target')
 task('encodeAddSourceToken', 'Get the calldata of add source token for portal')
   .addParam('source', 'Source token address', undefined, types.string, false)
   .addParam('merge', 'Merge token address', undefined, types.string, false)
-  .addParam('limit', 'The amount of limit with deposit all source token', undefined, types.int, false)
+  .addParam('limit', 'The amount(unit: ether) of limit with deposit all source token', undefined, types.string, false)
   .addParam('portal', 'The portal address (default get from portal deploy log)', undefined, types.string, true)
   .setAction(async (taskArgs, hre) => {
     let sourceToken = taskArgs.source;
@@ -186,7 +186,7 @@ task('encodeAddSourceToken', 'Get the calldata of add source token for portal')
 
     const mergeTokenContract = await hre.ethers.getContractAt(getMergeTokenContractName(), mergeToken);
     const decimals = await mergeTokenContract.decimals();
-    const limitValue = hre.ethers.parseUnits(limit.toString(), decimals);
+    const limitValue = hre.ethers.parseUnits(limit, decimals);
     console.log('limitValue', limitValue.toString());
 
     const portalContract = await hre.ethers.getContractAt(getPortalContractName(), portal);
@@ -243,7 +243,7 @@ task('encodeUpdateDepositStatus', 'Get the calldata of update deposit status for
 
 task('encodeUpdateDepositLimit', 'Get the calldata of update deposit limit for portal')
   .addParam('source', 'Source token address', undefined, types.string, false)
-  .addParam('limit', 'The amount of limit with deposit all source token', undefined, types.int, false)
+  .addParam('limit', 'The amount(unit: ether) of limit with deposit all source token', undefined, types.string, false)
   .addParam('portal', 'The portal address (default get from portal deploy log)', undefined, types.string, true)
   .setAction(async (taskArgs, hre) => {
     let sourceToken = taskArgs.source;
@@ -262,7 +262,7 @@ task('encodeUpdateDepositLimit', 'Get the calldata of update deposit limit for p
 
     const mergeTokenContract = await hre.ethers.getContractAt(getMergeTokenContractName(), mergeToken);
     const decimals = await mergeTokenContract.decimals();
-    const limitValue = hre.ethers.parseUnits(limit.toString(), decimals);
+    const limitValue = hre.ethers.parseUnits(limit, decimals);
     console.log('limitValue', limitValue.toString());
 
     const calldata = portalContract.interface.encodeFunctionData('setDepositLimit', [sourceToken, limitValue]);
