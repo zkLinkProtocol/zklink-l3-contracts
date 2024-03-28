@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.23;
+pragma solidity ^0.8.0;
 
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
 import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
@@ -23,12 +23,14 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
 
     /// @notice Initializes the portal contract.
     function initialize() external initializer {
-        __UUPSUpgradeable_init();
-        __Ownable_init();
-        __ReentrancyGuard_init();
+        __UUPSUpgradeable_init_unchained();
+        __Ownable_init_unchained();
+        __ReentrancyGuard_init_unchained();
     }
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {
+        // can only called by owner
+    }
 
     /// @notice Get source token info
     function getSourceTokenInfos(address _sourceToken) public view override returns (SourceTokenInfo memory) {
