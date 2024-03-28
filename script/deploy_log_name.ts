@@ -1,5 +1,5 @@
 // consumed in deploy_portal.ts
-export const DEPLOY_PORTAL_LOG = 'deploy_portal';
+export const DEPLOY_PORTAL_LOG_PREFIX = 'deploy_portal';
 export const DEPLOY_LOG_PORTAL_TARGET = 'portalTarget';
 export const DEPLOY_LOG_PORTAL_TARGET_VERIFIED = 'portalTargetVerified';
 export const DEPLOY_LOG_PORTAL_PROXY = 'portalProxy';
