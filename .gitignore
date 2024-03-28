@@ -10,10 +10,18 @@ abi
 # Hardhat files
 cache-zk
 artifacts-zk
+deployments-zk
 cache
 artifacts
-coverage
-coverage.json
+deployments
+
+# TypeChain files
+/typechain
+/typechain-types
+
+# solidity-coverage files
+/coverage
+/coverage.json
 
 # Openzeppelin upgrade
 .upgradable

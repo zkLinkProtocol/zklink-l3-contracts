@@ -14,6 +14,7 @@
     "@matterlabs/hardhat-zksync-upgradable": "^1.2.1",
     "@matterlabs/hardhat-zksync-verify": "^1.2.0",
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/hardhat-upgrades": "^3.0.5",
     "dotenv": "^16.4.5",
     "eslint": "^8.30.0",
     "eslint-config-prettier": "^9.0.0",
@@ -34,13 +35,12 @@
     "lint": "npm run lint:js && npm run lint:sol",
     "lint:fix": "npm run lint:js:fix && npm run lint:sol:fix",
     "lint:js": "prettier --log-level warn --ignore-path .gitignore '**/*.{js,ts}' --check && eslint --ignore-path .gitignore .",
-    "lint:js:fix": "prettier --log-level warn --ignore-path .gitignore '**/*.{js,ts}' --write && eslint --ignore-path .gitignore . --fix",
+    "lint:js:fix": "prettier --log-level warn --ignore-path .gitignore '**/*.{js,ts}' --write && eslint --no-error-on-unmatched-pattern --ignore-path .gitignore . --fix",
     "lint:sol": "prettier --log-level warn --ignore-path .gitignore 'contracts/**/*.sol' --check && solhint 'contracts/**/*.sol'",
     "lint:sol:fix": "prettier --log-level warn --ignore-path .gitignore 'contracts/**/*.sol' --write"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.9.5",
-    "@openzeppelin/contracts-upgradeable": "^4.9.5",
-    "@openzeppelin/hardhat-upgrades": "^3.0.5"
+    "@openzeppelin/contracts-upgradeable": "^4.9.5"
   }
 }

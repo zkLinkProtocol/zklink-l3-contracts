@@ -1,17 +1,19 @@
-require('@nomicfoundation/hardhat-toolbox');
-require('@openzeppelin/hardhat-upgrades');
-require('@matterlabs/hardhat-zksync-deploy');
-require('@matterlabs/hardhat-zksync-solc');
-require('@matterlabs/hardhat-zksync-verify');
-require('@matterlabs/hardhat-zksync-upgradable');
-require('solidity-coverage');
-require('hardhat-abi-exporter');
-require('dotenv').config();
+import { HardhatUserConfig } from 'hardhat/config';
+import '@nomicfoundation/hardhat-toolbox';
+import '@openzeppelin/hardhat-upgrades';
+import '@matterlabs/hardhat-zksync-deploy';
+import '@matterlabs/hardhat-zksync-solc';
+import '@matterlabs/hardhat-zksync-verify';
+import '@matterlabs/hardhat-zksync-upgradable';
+import 'solidity-coverage';
+import 'hardhat-abi-exporter';
+import './script/deploy_portal';
+import './script/deploy_merge_token';
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
-const hardhatUserConfig = {
+const config: HardhatUserConfig = {
   abiExporter: {
     path: './abi',
     runOnCompile: true,
@@ -20,6 +22,10 @@ const hardhatUserConfig = {
     spacing: 2,
     only: ['contracts/.*.sol'],
     format: 'json',
+  },
+  typechain: {
+    outDir: 'typechain',
+    target: 'ethers-v6',
   },
   solidity: {
     compilers: [
@@ -56,4 +62,4 @@ const hardhatUserConfig = {
   },
 };
 
-module.exports = hardhatUserConfig;
+export default config;
