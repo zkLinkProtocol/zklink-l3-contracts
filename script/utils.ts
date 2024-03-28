@@ -2,8 +2,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { Wallet, Provider } from 'zksync-ethers';
 import { Deployer } from '@matterlabs/hardhat-zksync-deploy';
-import { HardhatRuntimeEnvironment, Network, HttpNetworkConfig, HardhatNetworkAccountConfig } from 'hardhat/types';
-import { BaseContract, Signer, Contract, ContractTransactionResponse } from 'ethers';
+import { HardhatRuntimeEnvironment, Network, HttpNetworkConfig } from 'hardhat/types';
+import { BaseContract, Signer, ContractTransactionResponse } from 'ethers';
 import { DeployProxyOptions, UpgradeProxyOptions } from '@openzeppelin/hardhat-upgrades/src/utils/options';
 import * as dotenv from 'dotenv';
 dotenv.config();
@@ -127,9 +127,8 @@ export class ChainContractDeployer {
     // a flag to identify if chain is zksync
     this.zksync = network.zksync !== undefined && network.zksync;
     console.log('deploy on zksync?', this.zksync);
-
-    if (!process.env.WALLET_PRIVATE_KEY) throw "⛔️ Wallet private key wasn't found in .env file!";
-    const deployerKey = process.env.WALLET_PRIVATE_KEY;
+    // use the first account of accounts in the hardhat network config as the deployer
+    const deployerKey: string = (networkConfig.accounts as string[])[0];
     if (this.zksync) {
       this.zkSyncProvider = new Provider((networkConfig as HttpNetworkConfig).url);
       this.deployerWallet = new Wallet(deployerKey, this.zkSyncProvider);
@@ -158,27 +157,26 @@ export class ChainContractDeployer {
   }
 
   async deployProxy(contractName: string, initArgs: any[], opts: DeployProxyOptions) {
-    let { initializer, constructorArgs, kind } = opts;
-    if (constructorArgs === undefined) {
-      constructorArgs = [];
+    if (opts.constructorArgs === undefined) {
+      opts.constructorArgs = [];
     }
-    if (kind === undefined) {
-      kind = 'uups';
+    if (opts.kind === undefined) {
+      opts.kind = 'uups';
     }
     let contract;
     if (this.zksync) {
       const artifact = await (this.zkSyncDeployer as Deployer).loadArtifact(contractName);
       contract = await this.hardhat.zkUpgrades.deployProxy(this.deployerWallet as Wallet, artifact, initArgs, {
-        kind: kind,
-        constructorArgs: constructorArgs,
+        kind: opts.kind,
+        constructorArgs: opts.constructorArgs,
         unsafeAllow: opts.unsafeAllow,
         initializer: opts.initializer,
       });
     } else {
       const factory = await this.hardhat.ethers.getContractFactory(contractName, this.deployerWallet);
       contract = await this.hardhat.upgrades.deployProxy(factory, initArgs, {
-        kind: kind,
-        constructorArgs: constructorArgs,
+        kind: opts.kind,
+        constructorArgs: opts.constructorArgs,
         unsafeAllow: opts.unsafeAllow,
         initializer: opts.initializer,
       });

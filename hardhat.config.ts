@@ -41,7 +41,6 @@ const config: HardhatUserConfig = {
       },
     ],
   },
-  defaultNetwork: process.env.DEFAULT_NETWORK || 'hardhat',
   networks: {
     hardhat: {
       zksync: false,
@@ -51,7 +50,15 @@ const config: HardhatUserConfig = {
       ethNetwork: 'goerli',
       verifyURL: 'https://goerli.explorer.zklink.io/contract_verification',
       zksync: true,
+      accounts: ["YOUR_KEY"]
     },
+    zklinkNova: {
+      url: 'https://rpc.zklink.io',
+      ethNetwork: 'mainnet',
+      verifyURL: 'https://explorer.zklink.io/contract_verification',
+      zksync: true,
+      accounts: ["YOUR_KEY"]
+    }
   },
   zksolc: {
     version: '1.3.22',
