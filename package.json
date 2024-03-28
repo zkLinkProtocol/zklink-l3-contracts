@@ -14,6 +14,7 @@
     "@matterlabs/hardhat-zksync-upgradable": "^1.2.1",
     "@matterlabs/hardhat-zksync-verify": "^1.2.0",
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/hardhat-upgrades": "^3.0.5",
     "dotenv": "^16.4.5",
     "eslint": "^8.30.0",
     "eslint-config-prettier": "^9.0.0",
@@ -40,7 +41,6 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.9.5",
-    "@openzeppelin/contracts-upgradeable": "^4.9.5",
-    "@openzeppelin/hardhat-upgrades": "^3.0.5"
+    "@openzeppelin/contracts-upgradeable": "^4.9.5"
   }
 }
