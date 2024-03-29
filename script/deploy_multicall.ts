@@ -29,7 +29,7 @@ task('deployMulticall3', 'Deploy Multicall3')
     dLog[DEPLOY_LOG_DEPLOYER] = await deployerWallet?.getAddress();
     fs.writeFileSync(deployLogPath, JSON.stringify(dLog, null, 2));
 
-    // deploy merge token
+    // deploy multicall3
     let multicall3Addr;
     if (!(DEPLOY_LOG_MULTICALL in dLog)) {
       console.log('deploy multicall3...');
