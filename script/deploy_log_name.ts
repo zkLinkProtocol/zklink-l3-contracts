@@ -17,3 +17,8 @@ export const DEPLOY_LOG_MERGETOKEN_NAME = 'mergeToken_NAME';
 export const DEPLOY_LOG_MERGETOKEN_SYMBOL = 'mergeToken_SYMBOL';
 export const DEPLOY_LOG_MERGETOKEN_DECIMALS = 'mergeToken_DECIMALS';
 export const DEPLOY_LOG_MERGETOKEN_VERIFIED = 'mergeTokenVerified';
+
+// consumed in deploy_multicall.ts
+export const DEPLOY_MULTICALL_LOG_PREFIX = 'deploy_multicall';
+export const DEPLOY_LOG_MULTICALL = 'multicall';
+export const DEPLOY_LOG_MULTICALL_VERIFIED = 'multicallVerified';

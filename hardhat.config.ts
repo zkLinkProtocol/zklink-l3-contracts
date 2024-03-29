@@ -10,6 +10,7 @@ import 'hardhat-abi-exporter';
 import * as dotenv from 'dotenv';
 import './script/deploy_portal';
 import './script/deploy_merge_token';
+import './script/deploy_multicall';
 
 dotenv.config();
 
@@ -61,8 +62,8 @@ const config: HardhatUserConfig = {
       ethNetwork: 'mainnet',
       verifyURL: 'https://explorer.zklink.io/contract_verification',
       zksync: true,
-      accounts: [process.env.WALLET_PRIVATE_KEY || '']
-    }
+      accounts: [process.env.WALLET_PRIVATE_KEY || ''],
+    },
   },
   zksolc: {
     version: '1.3.22',
