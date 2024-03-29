@@ -134,7 +134,9 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
 
     /// @notice Grant commitee role
     function grantCommiteeRole(address _commiteeRoleAddress) external onlyOwner {
+        require(_commiteeRoleAddress != address(0), "Invalid commitee role address");
         address oldCommiteeRoleAddress = commiteeRoleAddress;
+        require(oldCommiteeRoleAddress != _commiteeRoleAddress, "Commitee role address is the same");
         commiteeRoleAddress = _commiteeRoleAddress;
 
         emit CommiteeUpdated(oldCommiteeRoleAddress, _commiteeRoleAddress);
