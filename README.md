@@ -14,8 +14,9 @@ Run all unit tests:
 
 `npx hardhat test`
 
-## Deploy
-
+## Governance
+### Architecture
+![Architecture](./docs/asset/Architecture.png)
 
 ## Development
 
