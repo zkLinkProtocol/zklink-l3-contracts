@@ -18,3 +18,11 @@ export const DEPLOY_LOG_MERGETOKEN_NAME = 'mergeToken_NAME';
 export const DEPLOY_LOG_MERGETOKEN_SYMBOL = 'mergeToken_SYMBOL';
 export const DEPLOY_LOG_MERGETOKEN_DECIMALS = 'mergeToken_DECIMALS';
 export const DEPLOY_LOG_MERGETOKEN_VERIFIED = 'mergeTokenVerified';
+
+// consumed in deploy_governance.ts
+export const DEPLOY_GOVERNANCE_LOG_PREFIX = 'deploy_governance';
+export const DEPLOY_LOG_GOVERNANCE = 'governance';
+export const DEPLOY_LOG_GOVERNANCE_ADMIN = 'admin';
+export const DEPLOY_LOG_GOVERNANCE_SECURITY_COUNCIL = 'securityCouncil';
+export const DEPLOY_LOG_GOVERNANCE_MIN_DELAY = 'minDelay';
+export const DEPLOY_LOG_GOVERNANCE_VERIFIED = 'governanceVerified';
