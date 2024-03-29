@@ -12,8 +12,18 @@ import {IERC20MergeToken} from "../interfaces/IERC20MergeToken.sol";
 contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
+    address public commiteeRoleAddress;
+
     /// @dev A mapping source token address => source token status.
     mapping(address sourceToken => SourceTokenInfo) public sourceTokenInfoMap;
+
+    modifier onlyOwnerOrCommitee() {
+        require(
+            _msgSender() == owner() || _msgSender() == commiteeRoleAddress,
+            "Only owner or commitee can call this function"
+        );
+        _;
+    }
 
     /// @dev Contract is expected to be used as proxy implementation.
     /// @dev Disable the initialization to prevent Parity hack.
@@ -22,10 +32,12 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
     }
 
     /// @notice Initializes the portal contract.
-    function initialize() external initializer {
+    function initialize(address _commiteeRoleAddress) external initializer {
         __UUPSUpgradeable_init_unchained();
         __Ownable_init_unchained();
         __ReentrancyGuard_init_unchained();
+
+        commiteeRoleAddress = _commiteeRoleAddress;
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {
@@ -92,7 +104,7 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
     }
 
     /// @notice Remove source token
-    function removeSourceToken(address _sourceToken) external onlyOwner {
+    function removeSourceToken(address _sourceToken) external onlyOwnerOrCommitee {
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
         require(tokenInfo.balance == 0, "Source Token balance is not zero");
         delete sourceTokenInfoMap[_sourceToken];
@@ -101,7 +113,7 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
     }
 
     /// @notice Lock source token
-    function updateDepositStatus(address _sourceToken, bool _isLocked) external onlyOwner {
+    function updateDepositStatus(address _sourceToken, bool _isLocked) external onlyOwnerOrCommitee {
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
         require(tokenInfo.isSupported, "Source token is not supported");
 
@@ -118,5 +130,13 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
         tokenInfo.depositLimit = _limit;
 
         emit DepositLimitUpdated(_sourceToken, _limit);
+    }
+
+    /// @notice Grant commitee role
+    function grantCommiteeRole(address _commiteeRoleAddress) external onlyOwner {
+        address oldCommiteeRoleAddress = commiteeRoleAddress;
+        commiteeRoleAddress = _commiteeRoleAddress;
+
+        emit CommiteeUpdated(oldCommiteeRoleAddress, _commiteeRoleAddress);
     }
 }
