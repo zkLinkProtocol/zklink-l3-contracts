@@ -1,10 +1,5 @@
 import * as fs from 'fs';
-import {
-  verifyContractCode,
-  createOrGetDeployLog,
-  ChainContractDeployer,
-  getDeployTx,
-} from './utils';
+import { verifyContractCode, createOrGetDeployLog, ChainContractDeployer, getDeployTx } from './utils';
 import {
   DEPLOY_LOG_DEPLOYER,
   DEPLOY_LOG_DEPLOY_TX_HASH,
@@ -22,7 +17,6 @@ function getContractName() {
 task('deployMulticall3', 'Deploy Multicall3')
   .addParam('skipVerify', 'Skip verify', false, types.boolean, true)
   .setAction(async (taskArgs, hardhat) => {
-
     let skipVerify = taskArgs.skipVerify;
     console.log('skip verify contracts?', skipVerify);
 
@@ -30,10 +24,7 @@ task('deployMulticall3', 'Deploy Multicall3')
     await contractDeployer.init();
     const deployerWallet = contractDeployer.deployerWallet;
 
-    const { deployLogPath, deployLog } = createOrGetDeployLog(
-      DEPLOY_MULTICALL_LOG_PREFIX,
-      hardhat.network.name,
-    );
+    const { deployLogPath, deployLog } = createOrGetDeployLog(DEPLOY_MULTICALL_LOG_PREFIX, hardhat.network.name);
     const dLog = deployLog as any;
     dLog[DEPLOY_LOG_DEPLOYER] = await deployerWallet?.getAddress();
     fs.writeFileSync(deployLogPath, JSON.stringify(dLog, null, 2));
@@ -43,7 +34,7 @@ task('deployMulticall3', 'Deploy Multicall3')
     if (!(DEPLOY_LOG_MULTICALL in dLog)) {
       console.log('deploy multicall3...');
       const contractName = getContractName();
-      const contract = await contractDeployer.deployContract(contractName,[]);
+      const contract = await contractDeployer.deployContract(contractName, []);
       const transaction = await getDeployTx(contract);
       multicall3Addr = await contract.getAddress();
       dLog[DEPLOY_LOG_MULTICALL] = multicall3Addr;
