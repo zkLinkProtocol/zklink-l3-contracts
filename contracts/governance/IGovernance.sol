@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.20;
+pragma solidity ^0.8.0;
 
 interface IGovernance {
     /// @dev This enumeration includes the following states:
@@ -47,13 +47,13 @@ interface IGovernance {
 
     function scheduleTransparent(Operation calldata _operation, uint256 _delay) external;
 
-    function scheduleShadow(bytes32 _id, uint256 _delay) external;
+    // function scheduleShadow(bytes32 _id, uint256 _delay) external;
 
     function cancel(bytes32 _id) external;
 
     function execute(Operation calldata _operation) external payable;
 
-    function executeInstant(Operation calldata _operation) external payable;
+    // function executeInstant(Operation calldata _operation) external payable;
 
     function hashOperation(Operation calldata _operation) external pure returns (bytes32);
 
