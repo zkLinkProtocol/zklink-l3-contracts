@@ -12,14 +12,22 @@ import {IERC20MergeToken} from "../interfaces/IERC20MergeToken.sol";
 contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
 
-    address public commiteeRoleAddress;
-
     /// @dev A mapping source token address => source token status.
     mapping(address sourceToken => SourceTokenInfo) public sourceTokenInfoMap;
 
-    modifier onlyOwnerOrCommitee() {
+    // @dev Security Council address
+    address public securityCouncil;
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[48] private __gap;
+
+    modifier onlyOwnerOrSecurityCouncil() {
         require(
-            _msgSender() == owner() || _msgSender() == commiteeRoleAddress,
+            _msgSender() == owner() || _msgSender() == securityCouncil,
             "Only owner or commitee can call this function"
         );
         _;
@@ -32,12 +40,12 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
     }
 
     /// @notice Initializes the portal contract.
-    function initialize(address _commiteeRoleAddress) external initializer {
+    function initialize(address _securityCouncil) external initializer {
         __UUPSUpgradeable_init_unchained();
         __Ownable_init_unchained();
         __ReentrancyGuard_init_unchained();
 
-        commiteeRoleAddress = _commiteeRoleAddress;
+        securityCouncil = _securityCouncil;
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {
@@ -104,7 +112,7 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
     }
 
     /// @notice Remove source token
-    function removeSourceToken(address _sourceToken) external onlyOwnerOrCommitee {
+    function removeSourceToken(address _sourceToken) external onlyOwnerOrSecurityCouncil {
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
         require(tokenInfo.balance == 0, "Source Token balance is not zero");
         delete sourceTokenInfoMap[_sourceToken];
@@ -113,7 +121,7 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
     }
 
     /// @notice Lock source token
-    function updateDepositStatus(address _sourceToken, bool _isLocked) external onlyOwnerOrCommitee {
+    function updateDepositStatus(address _sourceToken, bool _isLocked) external onlyOwnerOrSecurityCouncil {
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
         require(tokenInfo.isSupported, "Source token is not supported");
 
@@ -132,13 +140,13 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
         emit DepositLimitUpdated(_sourceToken, _limit);
     }
 
-    /// @notice Grant commitee role
-    function grantCommiteeRole(address _commiteeRoleAddress) external onlyOwner {
-        require(_commiteeRoleAddress != address(0), "Invalid commitee role address");
-        address oldCommiteeRoleAddress = commiteeRoleAddress;
-        require(oldCommiteeRoleAddress != _commiteeRoleAddress, "Commitee role address is the same");
-        commiteeRoleAddress = _commiteeRoleAddress;
+    /// @notice Grant security council role
+    function grantSecurityCouncilRole(address _securityCouncil) external onlyOwner {
+        require(_securityCouncil != address(0), "Invalid the security council role address");
+        address oldSecurityCouncil = securityCouncil;
+        require(oldSecurityCouncil != _securityCouncil, "The Security Council role address is the same as old one");
+        securityCouncil = _securityCouncil;
 
-        emit CommiteeUpdated(oldCommiteeRoleAddress, _commiteeRoleAddress);
+        emit SecurityCouncilUpdated(oldSecurityCouncil, _securityCouncil);
     }
 }

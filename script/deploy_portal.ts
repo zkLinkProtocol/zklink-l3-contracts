@@ -10,7 +10,7 @@ import {
 import {
   DEPLOY_PORTAL_LOG_PREFIX,
   DEPLOY_LOG_DEPLOYER,
-  DEPLOY_LOG_PORTAL_COMMITEE,
+  DEPLOY_LOG_PORTAL_COUNCIL,
   DEPLOY_LOG_PORTAL_TARGET,
   DEPLOY_LOG_PORTAL_TARGET_VERIFIED,
   DEPLOY_LOG_PORTAL_PROXY,
@@ -29,12 +29,12 @@ function getMergeTokenContractName() {
 }
 
 task('deployPortal', 'Deploy portal')
-  .addParam('commitee', 'Commitee address', undefined, types.string, false)
+  .addParam('securityCouncil', 'The Security Council address', undefined, types.string, false)
   .addParam('skipVerify', 'Skip verify', false, types.boolean, true)
   .setAction(async (taskArgs, hardhat) => {
-    let commiteeAddress = taskArgs.commitee;
+    let securityCouncilAddress = taskArgs.securityCouncil;
     let skipVerify = taskArgs.skipVerify;
-    console.log('commitee address', commiteeAddress);
+    console.log('security council address', securityCouncilAddress);
     console.log('skip verify contracts?', skipVerify);
 
     const contractDeployer = new ChainContractDeployer(hardhat);
@@ -44,7 +44,7 @@ task('deployPortal', 'Deploy portal')
     const { deployLogPath, deployLog } = createOrGetDeployLog(DEPLOY_PORTAL_LOG_PREFIX, hardhat.network.name);
     const dLog = deployLog as any;
     dLog[DEPLOY_LOG_DEPLOYER] = await deployerWallet?.getAddress();
-    dLog[DEPLOY_LOG_PORTAL_COMMITEE] = commiteeAddress;
+    dLog[DEPLOY_LOG_PORTAL_COUNCIL] = securityCouncilAddress;
     fs.writeFileSync(deployLogPath, JSON.stringify(dLog, null, 2));
 
     // deploy portal
@@ -52,7 +52,7 @@ task('deployPortal', 'Deploy portal')
     if (!(DEPLOY_LOG_PORTAL_PROXY in dLog)) {
       console.log('deploy portal...');
       const contractName = getPortalContractName();
-      const contract = await contractDeployer.deployProxy(contractName, [commiteeAddress], {
+      const contract = await contractDeployer.deployProxy(contractName, [securityCouncilAddress], {
         unsafeAllow: ['constructor'],
       });
       const transaction = await getDeployTx(contract);
@@ -276,12 +276,12 @@ task('encodeUpdateDepositLimit', 'Get the calldata of update deposit limit for p
     return calldata;
   });
 
-task('encodeGrantCommiteeRole', 'Get the calldata of grant commitee role for portal')
-  .addParam('commitee', 'Commitee address', undefined, types.string, false)
+task('encodeGrantSecurityCouncilRole', 'Get the calldata of grant the security council role for portal')
+  .addParam('securityCouncil', 'The Security Council address', undefined, types.string, false)
   .addParam('portal', 'The portal address (default get from portal deploy log)', undefined, types.string, true)
   .setAction(async (taskArgs, hre) => {
-    let commitee = taskArgs.commitee;
-    console.log('commitee', commitee);
+    let securityCouncilAddr = taskArgs.securityCouncil;
+    console.log('The Security Council Address', securityCouncilAddr);
     let portal = taskArgs.portal;
     if (portal === undefined) {
       portal = readDeployContract(DEPLOY_PORTAL_LOG_PREFIX, DEPLOY_LOG_PORTAL_PROXY, hre.network.name);
@@ -289,7 +289,7 @@ task('encodeGrantCommiteeRole', 'Get the calldata of grant commitee role for por
     console.log('portal address', portal);
 
     const portalContract = await hre.ethers.getContractAt(getPortalContractName(), portal);
-    const calldata = portalContract.interface.encodeFunctionData('grantCommiteeRole', [commitee]);
+    const calldata = portalContract.interface.encodeFunctionData('grantSecurityCouncilRole', [securityCouncilAddr]);
     console.log('calldata', calldata);
 
     return calldata;

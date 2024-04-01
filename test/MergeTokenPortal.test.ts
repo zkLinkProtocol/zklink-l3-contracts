@@ -161,28 +161,28 @@ describe('MergeToeknPortal', function () {
       );
     });
 
-    it('Should allow owner grant commitee role', async function () {
-      const oldCommitee = await mergeTokenPortal.commiteeRoleAddress();
+    it('Should allow owner grant the security council role', async function () {
+      const oldCommitee = await mergeTokenPortal.securityCouncil();
       expect(oldCommitee).to.equal(commiteeAddr);
-      await mergeTokenPortal.connect(owner).grantCommiteeRole(user1Addr);
-      expect(await mergeTokenPortal.commiteeRoleAddress()).to.equal(user1Addr);
+      await mergeTokenPortal.connect(owner).grantSecurityCouncilRole(user1Addr);
+      expect(await mergeTokenPortal.securityCouncil()).to.equal(user1Addr);
     });
 
-    it('Should not allow non-owner to grant commitee role', async function () {
-      await expect(mergeTokenPortal.connect(user1).grantCommiteeRole(user2Addr)).to.be.revertedWith(
+    it('Should not allow non-owner to grant the security council role', async function () {
+      await expect(mergeTokenPortal.connect(user1).grantSecurityCouncilRole(user2Addr)).to.be.revertedWith(
         'Ownable: caller is not the owner',
       );
     });
 
-    it('Should not allow grant commitee role to zero address', async function () {
-      await expect(mergeTokenPortal.connect(owner).grantCommiteeRole(ZERO_ADDRESS)).to.be.revertedWith(
-        'Invalid commitee role address',
+    it('Should not allow grant the security council role to zero address', async function () {
+      await expect(mergeTokenPortal.connect(owner).grantSecurityCouncilRole(ZERO_ADDRESS)).to.be.revertedWith(
+        'Invalid the security council role address',
       );
     });
 
-    it('Should not allow grant commitee role to old commitee address', async function () {
-      await expect(mergeTokenPortal.connect(owner).grantCommiteeRole(commiteeAddr)).to.be.revertedWith(
-        'Commitee role address is the same',
+    it('Should not allow grant the security council role to old one', async function () {
+      await expect(mergeTokenPortal.connect(owner).grantSecurityCouncilRole(commiteeAddr)).to.be.revertedWith(
+        'The Security Council role address is the same as old one',
       );
     });
   });
