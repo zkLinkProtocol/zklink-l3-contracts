@@ -1,10 +1,11 @@
 import { expect } from 'chai';
 import * as hre from 'hardhat';
 import { ethers, upgrades } from 'hardhat';
-import { Signer, Contract } from 'ethers';
-import { MergeTokenPortal, MergeTokenPortal__factory, ERC20MergeToken } from '../typechain';
+import { Signer } from 'ethers';
+import { MergeTokenPortal, ERC20MergeToken } from '../typechain';
 
 describe('MergeToeknPortal', function () {
+  const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
   let mergeTokenPortal: any;
   let erc2OSource0MergenToeken: ERC20MergeToken;
   let owner: Signer;
@@ -157,6 +158,31 @@ describe('MergeToeknPortal', function () {
       expect(balance).to.equal(90n);
       await expect(mergeTokenPortal.connect(owner).removeSourceToken(erc20MergeAddr1Token.target)).to.be.revertedWith(
         'Source Token balance is not zero',
+      );
+    });
+
+    it('Should allow owner grant commitee role', async function () {
+      const oldCommitee = await mergeTokenPortal.commiteeRoleAddress();
+      expect(oldCommitee).to.equal(commiteeAddr);
+      await mergeTokenPortal.connect(owner).grantCommiteeRole(user1Addr);
+      expect(await mergeTokenPortal.commiteeRoleAddress()).to.equal(user1Addr);
+    });
+
+    it('Should not allow non-owner to grant commitee role', async function () {
+      await expect(mergeTokenPortal.connect(user1).grantCommiteeRole(user2Addr)).to.be.revertedWith(
+        'Ownable: caller is not the owner',
+      );
+    });
+
+    it('Should not allow grant commitee role to zero address', async function () {
+      await expect(mergeTokenPortal.connect(owner).grantCommiteeRole(ZERO_ADDRESS)).to.be.revertedWith(
+        'Invalid commitee role address',
+      );
+    });
+
+    it('Should not allow grant commitee role to old commitee address', async function () {
+      await expect(mergeTokenPortal.connect(owner).grantCommiteeRole(commiteeAddr)).to.be.revertedWith(
+        'Commitee role address is the same',
       );
     });
   });
