@@ -11,6 +11,7 @@ import * as dotenv from 'dotenv';
 import './script/deploy_portal';
 import './script/deploy_merge_token';
 import './script/deploy_governance';
+import './script/deploy_multicall';
 
 dotenv.config();
 

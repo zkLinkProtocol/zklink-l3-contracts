@@ -26,3 +26,8 @@ export const DEPLOY_LOG_GOVERNANCE_ADMIN = 'admin';
 export const DEPLOY_LOG_GOVERNANCE_SECURITY_COUNCIL = 'securityCouncil';
 export const DEPLOY_LOG_GOVERNANCE_MIN_DELAY = 'minDelay';
 export const DEPLOY_LOG_GOVERNANCE_VERIFIED = 'governanceVerified';
+
+// consumed in deploy_multicall.ts
+export const DEPLOY_MULTICALL_LOG_PREFIX = 'deploy_multicall';
+export const DEPLOY_LOG_MULTICALL = 'multicall';
+export const DEPLOY_LOG_MULTICALL_VERIFIED = 'multicallVerified';
