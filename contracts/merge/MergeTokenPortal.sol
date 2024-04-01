@@ -15,6 +15,24 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
     /// @dev A mapping source token address => source token status.
     mapping(address sourceToken => SourceTokenInfo) public sourceTokenInfoMap;
 
+    // @dev Security Council address
+    address public securityCouncil;
+
+    /**
+     * @dev This empty reserved space is put in place to allow future versions to add new
+     * variables without shifting down storage in the inheritance chain.
+     * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
+     */
+    uint256[48] private __gap;
+
+    modifier onlyOwnerOrSecurityCouncil() {
+        require(
+            _msgSender() == owner() || _msgSender() == securityCouncil,
+            "Only owner or commitee can call this function"
+        );
+        _;
+    }
+
     /// @dev Contract is expected to be used as proxy implementation.
     /// @dev Disable the initialization to prevent Parity hack.
     constructor() {
@@ -22,10 +40,12 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
     }
 
     /// @notice Initializes the portal contract.
-    function initialize() external initializer {
+    function initialize(address _securityCouncil) external initializer {
         __UUPSUpgradeable_init_unchained();
         __Ownable_init_unchained();
         __ReentrancyGuard_init_unchained();
+
+        securityCouncil = _securityCouncil;
     }
 
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {
@@ -92,7 +112,7 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
     }
 
     /// @notice Remove source token
-    function removeSourceToken(address _sourceToken) external onlyOwner {
+    function removeSourceToken(address _sourceToken) external onlyOwnerOrSecurityCouncil {
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
         require(tokenInfo.balance == 0, "Source Token balance is not zero");
         delete sourceTokenInfoMap[_sourceToken];
@@ -101,7 +121,7 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
     }
 
     /// @notice Lock source token
-    function updateDepositStatus(address _sourceToken, bool _isLocked) external onlyOwner {
+    function updateDepositStatus(address _sourceToken, bool _isLocked) external onlyOwnerOrSecurityCouncil {
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
         require(tokenInfo.isSupported, "Source token is not supported");
 
@@ -118,5 +138,15 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
         tokenInfo.depositLimit = _limit;
 
         emit DepositLimitUpdated(_sourceToken, _limit);
+    }
+
+    /// @notice Grant security council role
+    function grantSecurityCouncilRole(address _securityCouncil) external onlyOwner {
+        require(_securityCouncil != address(0), "Invalid the security council role address");
+        address oldSecurityCouncil = securityCouncil;
+        require(oldSecurityCouncil != _securityCouncil, "The Security Council role address is the same as old one");
+        securityCouncil = _securityCouncil;
+
+        emit SecurityCouncilUpdated(oldSecurityCouncil, _securityCouncil);
     }
 }

@@ -1,16 +1,19 @@
 import { expect } from 'chai';
 import * as hre from 'hardhat';
 import { ethers, upgrades } from 'hardhat';
-import { Signer, Contract } from 'ethers';
-import { MergeTokenPortal, MergeTokenPortal__factory, ERC20MergeToken } from '../typechain';
+import { Signer } from 'ethers';
+import { MergeTokenPortal, ERC20MergeToken } from '../typechain';
 
 describe('MergeToeknPortal', function () {
+  const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
   let mergeTokenPortal: any;
   let erc2OSource0MergenToeken: ERC20MergeToken;
   let owner: Signer;
   let ownerAddr: string;
   let recipient: Signer;
   let recipientAddr: string;
+  let commitee: Signer;
+  let commiteeAddr: string;
   let user1: Signer;
   let user1Addr: string;
   let user2: Signer;
@@ -19,15 +22,16 @@ describe('MergeToeknPortal', function () {
   let user3Addr: string;
 
   beforeEach(async function () {
-    [owner, recipient, user1, user2, user3] = await hre.ethers.getSigners();
+    [owner, recipient, commitee, user1, user2, user3] = await hre.ethers.getSigners();
     ownerAddr = await owner.getAddress();
     recipientAddr = await recipient.getAddress();
+    commiteeAddr = await commitee.getAddress();
     user1Addr = await user1.getAddress();
     user2Addr = await user2.getAddress();
     user3Addr = await user3.getAddress();
 
     const MergeTokenPortal = await ethers.getContractFactory('MergeTokenPortal');
-    mergeTokenPortal = await upgrades.deployProxy(MergeTokenPortal, [], {
+    mergeTokenPortal = await upgrades.deployProxy(MergeTokenPortal, [commiteeAddr], {
       kind: 'uups',
       constructorArgs: [],
       unsafeAllow: ['constructor'],
@@ -113,7 +117,7 @@ describe('MergeToeknPortal', function () {
       ).to.be.revertedWith('Invalid token address');
     });
 
-    it('Should remove a source token', async function () {
+    it('Should allow owner remove a source token', async function () {
       await mergeTokenPortal.connect(owner).addSourceToken(ownerAddr, recipientAddr, 100);
       await mergeTokenPortal.connect(owner).removeSourceToken(ownerAddr);
       let sourceTokenInfo = await mergeTokenPortal.getSourceTokenInfos(ownerAddr);
@@ -123,16 +127,22 @@ describe('MergeToeknPortal', function () {
       expect(sourceTokenInfo.depositLimit).to.equal(0n);
     });
 
-    it('Should remove a source token2', async function () {
+    it('Should allow commitee remove a source token2', async function () {
       await mergeTokenPortal.connect(owner).addSourceToken(ownerAddr, recipientAddr, 100);
-      await mergeTokenPortal.connect(owner).removeSourceToken(ownerAddr);
-      await mergeTokenPortal.connect(owner).addSourceToken(ownerAddr, recipientAddr, 100);
-      await mergeTokenPortal.connect(owner).removeSourceToken(ownerAddr);
+      await mergeTokenPortal.connect(commitee).removeSourceToken(ownerAddr);
+
       let sourceTokenInfo = await mergeTokenPortal.getSourceTokenInfos(ownerAddr);
       expect(sourceTokenInfo.isSupported).to.equal(false);
       expect(sourceTokenInfo.isLocked).to.equal(false);
       expect(sourceTokenInfo.balance).to.equal(0n);
       expect(sourceTokenInfo.depositLimit).to.equal(0n);
+    });
+
+    it('Should not allow non-owner or non-commitee remove a source token', async function () {
+      await mergeTokenPortal.connect(owner).addSourceToken(ownerAddr, recipientAddr, 100);
+      await expect(mergeTokenPortal.connect(user1).removeSourceToken(ownerAddr)).to.be.revertedWith(
+        'Only owner or commitee can call this function',
+      );
     });
 
     it('Should not remove a source token if Source Token balance is not zero', async function () {
@@ -148,6 +158,31 @@ describe('MergeToeknPortal', function () {
       expect(balance).to.equal(90n);
       await expect(mergeTokenPortal.connect(owner).removeSourceToken(erc20MergeAddr1Token.target)).to.be.revertedWith(
         'Source Token balance is not zero',
+      );
+    });
+
+    it('Should allow owner grant the security council role', async function () {
+      const oldCommitee = await mergeTokenPortal.securityCouncil();
+      expect(oldCommitee).to.equal(commiteeAddr);
+      await mergeTokenPortal.connect(owner).grantSecurityCouncilRole(user1Addr);
+      expect(await mergeTokenPortal.securityCouncil()).to.equal(user1Addr);
+    });
+
+    it('Should not allow non-owner to grant the security council role', async function () {
+      await expect(mergeTokenPortal.connect(user1).grantSecurityCouncilRole(user2Addr)).to.be.revertedWith(
+        'Ownable: caller is not the owner',
+      );
+    });
+
+    it('Should not allow grant the security council role to zero address', async function () {
+      await expect(mergeTokenPortal.connect(owner).grantSecurityCouncilRole(ZERO_ADDRESS)).to.be.revertedWith(
+        'Invalid the security council role address',
+      );
+    });
+
+    it('Should not allow grant the security council role to old one', async function () {
+      await expect(mergeTokenPortal.connect(owner).grantSecurityCouncilRole(commiteeAddr)).to.be.revertedWith(
+        'The Security Council role address is the same as old one',
       );
     });
   });
@@ -186,11 +221,13 @@ describe('MergeToeknPortal', function () {
       erc20MergeAddr1Token = await ERC20TokenFactory.deploy(user1Addr, 'user1', 'ADD1TK', 18);
       erc20MergeAddr2Token = await ERC20TokenFactory.deploy(mergeTokenPortal.target, 'user2', 'ADD2TK', 18);
     });
+
     it('should revert when trying to deposit unsupported token', async () => {
       await expect(
         mergeTokenPortal.connect(user2).deposit(erc20MergeAddr1Token.target, 1000, user1Addr),
       ).to.be.revertedWith('Source token is not supported');
     });
+
     it('Should disable updateDepositStatus disabledeposit if Source token is not supported', async function () {
       await erc20MergeAddr1Token.connect(user2).approve(mergeTokenPortal.target, 1000);
       await erc20MergeAddr1Token.connect(user1).approve(mergeTokenPortal.target, 1000);
@@ -207,7 +244,8 @@ describe('MergeToeknPortal', function () {
         mergeTokenPortal.connect(user1).deposit(erc20MergeAddr1Token.target, 10, user1Addr),
       ).to.be.revertedWith('Source token is not supported');
     });
-    it('Should not allow non-owner to update deposit status when token is supported', async function () {
+
+    it('Should not allow non-owner or non-commitee to update deposit status when token is supported', async function () {
       await mergeTokenPortal
         .connect(owner)
         .addSourceToken(erc20MergeAddr1Token.target, erc2OSource0MergenToeken.target, 10000);
@@ -215,8 +253,21 @@ describe('MergeToeknPortal', function () {
       if (sourceInfo.isSupported) {
         await expect(
           mergeTokenPortal.connect(user3).updateDepositStatus(erc20MergeAddr1Token.target, true),
-        ).to.be.revertedWith('Ownable: caller is not the owner');
+        ).to.be.revertedWith('Only owner or commitee can call this function');
       }
+    });
+
+    it('Should allow owner or commitee to update deposit status when token is supported', async function () {
+      await mergeTokenPortal
+        .connect(owner)
+        .addSourceToken(erc20MergeAddr1Token.target, erc2OSource0MergenToeken.target, 10000);
+      await mergeTokenPortal.connect(owner).updateDepositStatus(erc20MergeAddr1Token.target, true);
+      let sourceInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token.target);
+      expect(sourceInfo.isLocked).to.equal(true);
+
+      await mergeTokenPortal.connect(commitee).updateDepositStatus(erc20MergeAddr1Token.target, false);
+      sourceInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token.target);
+      expect(sourceInfo.isLocked).to.equal(false);
     });
 
     it('Should not allow non-owner to set deposit limit', async function () {

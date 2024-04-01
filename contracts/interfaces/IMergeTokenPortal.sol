@@ -26,6 +26,8 @@ interface IMergeTokenPortal {
 
     event DepositLimitUpdated(address indexed sourceToken, uint256 depositLimit);
 
+    event SecurityCouncilUpdated(address indexed oldCommitee, address indexed newCommitee);
+
     /// @notice Source token info
     /// @param isSupported Is the source token supported
     /// @param isLocked Is the source token locked

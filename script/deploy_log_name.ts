@@ -1,5 +1,6 @@
 // consumed in deploy_portal.ts
 export const DEPLOY_PORTAL_LOG_PREFIX = 'deploy_portal';
+export const DEPLOY_LOG_PORTAL_COUNCIL = 'securityCouncilAddress';
 export const DEPLOY_LOG_PORTAL_TARGET = 'portalTarget';
 export const DEPLOY_LOG_PORTAL_TARGET_VERIFIED = 'portalTargetVerified';
 export const DEPLOY_LOG_PORTAL_PROXY = 'portalProxy';
@@ -17,6 +18,14 @@ export const DEPLOY_LOG_MERGETOKEN_NAME = 'mergeToken_NAME';
 export const DEPLOY_LOG_MERGETOKEN_SYMBOL = 'mergeToken_SYMBOL';
 export const DEPLOY_LOG_MERGETOKEN_DECIMALS = 'mergeToken_DECIMALS';
 export const DEPLOY_LOG_MERGETOKEN_VERIFIED = 'mergeTokenVerified';
+
+// consumed in deploy_governance.ts
+export const DEPLOY_GOVERNANCE_LOG_PREFIX = 'deploy_governance';
+export const DEPLOY_LOG_GOVERNANCE = 'governance';
+export const DEPLOY_LOG_GOVERNANCE_ADMIN = 'admin';
+export const DEPLOY_LOG_GOVERNANCE_SECURITY_COUNCIL = 'securityCouncil';
+export const DEPLOY_LOG_GOVERNANCE_MIN_DELAY = 'minDelay';
+export const DEPLOY_LOG_GOVERNANCE_VERIFIED = 'governanceVerified';
 
 // consumed in deploy_multicall.ts
 export const DEPLOY_MULTICALL_LOG_PREFIX = 'deploy_multicall';
