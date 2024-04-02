@@ -3,13 +3,14 @@
   "plugins": [],
   "rules": {
     "compiler-version": "off",
-    "custom-errors": "off",
     "func-name-mixedcase": "off",
     "func-visibility": ["warn",{"ignoreConstructors": true}],
     "mark-callable-contracts": "off",
     "max-states-count": "off",
     "no-inline-assembly": "off",
     "not-rely-on-time": "off",
-    "no-empty-blocks": "off"
+    "no-empty-blocks": "off",
+    "reason-string": "off",
+    "avoid-low-level-calls": "off"
   }
 }
