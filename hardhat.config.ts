@@ -12,6 +12,7 @@ import './script/deploy_portal';
 import './script/deploy_merge_token';
 import './script/deploy_governance';
 import './script/deploy_multicall';
+import { NetworksUserConfig, NetworkUserConfig } from 'hardhat/src/types/config';
 
 dotenv.config();
 
@@ -56,14 +57,12 @@ const config: HardhatUserConfig = {
       ethNetwork: 'goerli',
       verifyURL: 'https://goerli.explorer.zklink.io/contract_verification',
       zksync: true,
-      accounts: [process.env.WALLET_PRIVATE_KEY || ''],
     },
     zklinkNova: {
       url: 'https://rpc.zklink.io',
       ethNetwork: 'mainnet',
       verifyURL: 'https://explorer.zklink.io/contract_verification',
       zksync: true,
-      accounts: [process.env.WALLET_PRIVATE_KEY || ''],
     },
   },
   zksolc: {
@@ -74,5 +73,11 @@ const config: HardhatUserConfig = {
     timeout: 600000,
   },
 };
+
+if (!!config.defaultNetwork && config.defaultNetwork !== 'hardhat' && !!process.env.WALLET_PRIVATE_KEY) {
+  const ns = config.networks as NetworksUserConfig;
+  const nu = ns[config.defaultNetwork] as NetworkUserConfig;
+  nu.accounts = [process.env.WALLET_PRIVATE_KEY];
+}
 
 export default config;

@@ -32,8 +32,8 @@ task('deployPortal', 'Deploy portal')
   .addParam('securityCouncil', 'The Security Council address', undefined, types.string, false)
   .addParam('skipVerify', 'Skip verify', false, types.boolean, true)
   .setAction(async (taskArgs, hardhat) => {
-    let securityCouncilAddress = taskArgs.securityCouncil;
-    let skipVerify = taskArgs.skipVerify;
+    const securityCouncilAddress = taskArgs.securityCouncil;
+    const skipVerify = taskArgs.skipVerify;
     console.log('security council address', securityCouncilAddress);
     console.log('skip verify contracts?', skipVerify);
 
@@ -95,7 +95,7 @@ task('deployPortal', 'Deploy portal')
 task('upgradePortal', 'Upgrade portal')
   .addParam('skipVerify', 'Skip verify', false, types.boolean, true)
   .setAction(async (taskArgs, hardhat) => {
-    let skipVerify = taskArgs.skipVerify;
+    const skipVerify = taskArgs.skipVerify;
     console.log('skipVerify', skipVerify);
 
     const { deployLogPath, deployLog } = createOrGetDeployLog(DEPLOY_PORTAL_LOG_PREFIX, hardhat.network.name);
@@ -139,7 +139,7 @@ task('upgradePortal', 'Upgrade portal')
 task('deployPortalTarget', 'Deploy portal target')
   .addOptionalParam('skipVerify', 'Skip verify', false, types.boolean)
   .setAction(async (taskArgs, hardhat) => {
-    let skipVerify = taskArgs.skipVerify;
+    const skipVerify = taskArgs.skipVerify;
     console.log('skip verify contracts?', skipVerify);
 
     const contractDeployer = new ChainContractDeployer(hardhat);
@@ -152,13 +152,12 @@ task('deployPortalTarget', 'Deploy portal target')
     fs.writeFileSync(deployLogPath, JSON.stringify(dLog, null, 2));
 
     // deploy portal target
-    let portalTargetAddr;
     console.log('deploy portal target...');
     const contractName = getPortalContractName();
     const contract = await contractDeployer.deployContract(contractName, []);
     const transaction = await getDeployTx(contract);
     console.log('deploy tx hash', transaction?.hash);
-    portalTargetAddr = await contract.getAddress();
+    const portalTargetAddr = await contract.getAddress();
     dLog[DEPLOY_LOG_PORTAL_TARGET] = portalTargetAddr;
     fs.writeFileSync(deployLogPath, JSON.stringify(dLog, null, 2));
     console.log('portal', portalTargetAddr);
@@ -177,9 +176,9 @@ task('encodeAddSourceToken', 'Get the calldata of add source token for portal')
   .addParam('limit', 'The amount(unit: ether) of limit with deposit all source token', undefined, types.string, false)
   .addParam('portal', 'The portal address (default get from portal deploy log)', undefined, types.string, true)
   .setAction(async (taskArgs, hre) => {
-    let sourceToken = taskArgs.source;
-    let mergeToken = taskArgs.merge;
-    let limit = taskArgs.limit;
+    const sourceToken = taskArgs.source;
+    const mergeToken = taskArgs.merge;
+    const limit = taskArgs.limit;
     let portal = taskArgs.portal;
     console.log('sourceToken', sourceToken);
     console.log('mergeToken', mergeToken);
@@ -209,7 +208,7 @@ task('encodeRemoveSourceToken', 'Get the calldata of remove source token for por
   .addParam('source', 'Source token address', undefined, types.string, false)
   .addParam('portal', 'The portal address (default get from portal deploy log)', undefined, types.string, true)
   .setAction(async (taskArgs, hre) => {
-    let sourceToken = taskArgs.source;
+    const sourceToken = taskArgs.source;
     let portal = taskArgs.portal;
     console.log('sourceToken', sourceToken);
     if (portal === undefined) {
@@ -229,8 +228,8 @@ task('encodeUpdateDepositStatus', 'Get the calldata of update deposit status for
   .addParam('lock', 'The lock status of deposit', undefined, types.boolean, false)
   .addParam('portal', 'The portal address (default get from portal deploy log)', undefined, types.string, true)
   .setAction(async (taskArgs, hre) => {
-    let sourceToken = taskArgs.source;
-    let lock = taskArgs.lock;
+    const sourceToken = taskArgs.source;
+    const lock = taskArgs.lock;
     let portal = taskArgs.portal;
     console.log('sourceToken', sourceToken);
     console.log('lock status', lock);
@@ -251,8 +250,8 @@ task('encodeUpdateDepositLimit', 'Get the calldata of update deposit limit for p
   .addParam('limit', 'The amount(unit: ether) of limit with deposit all source token', undefined, types.string, false)
   .addParam('portal', 'The portal address (default get from portal deploy log)', undefined, types.string, true)
   .setAction(async (taskArgs, hre) => {
-    let sourceToken = taskArgs.source;
-    let limit = taskArgs.limit;
+    const sourceToken = taskArgs.source;
+    const limit = taskArgs.limit;
     let portal = taskArgs.portal;
     console.log('sourceToken', sourceToken);
     console.log('limit', limit);
@@ -280,7 +279,7 @@ task('encodeGrantSecurityCouncilRole', 'Get the calldata of grant the security c
   .addParam('securityCouncil', 'The Security Council address', undefined, types.string, false)
   .addParam('portal', 'The portal address (default get from portal deploy log)', undefined, types.string, true)
   .setAction(async (taskArgs, hre) => {
-    let securityCouncilAddr = taskArgs.securityCouncil;
+    const securityCouncilAddr = taskArgs.securityCouncil;
     console.log('The Security Council Address', securityCouncilAddr);
     let portal = taskArgs.portal;
     if (portal === undefined) {

@@ -32,9 +32,9 @@ task('deployMergeToken', 'Deploy MergeToken')
   .addParam('portal', 'The portal address (default get from portal deploy log)', undefined, types.string, true)
   .addParam('skipVerify', 'Skip verify', false, types.boolean, true)
   .setAction(async (taskArgs, hardhat) => {
-    let name = taskArgs.name;
-    let symbol = taskArgs.symbol;
-    let decimals = taskArgs.decimals;
+    const name = taskArgs.name;
+    const symbol = taskArgs.symbol;
+    const decimals = taskArgs.decimals;
     console.log('name:', name);
     console.log('symbol:', symbol);
     console.log('decimals:', decimals);
@@ -43,7 +43,7 @@ task('deployMergeToken', 'Deploy MergeToken')
     if (portal === undefined) {
       portal = readDeployContract(DEPLOY_PORTAL_LOG_PREFIX, DEPLOY_LOG_PORTAL_PROXY, hardhat.network.name);
     }
-    let skipVerify = taskArgs.skipVerify;
+    const skipVerify = taskArgs.skipVerify;
     console.log('skip verify contracts?', skipVerify);
     console.log('portal address:', portal);
 

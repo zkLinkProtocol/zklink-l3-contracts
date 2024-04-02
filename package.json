@@ -16,7 +16,7 @@
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
     "@openzeppelin/hardhat-upgrades": "^3.0.5",
     "dotenv": "^16.4.5",
-    "eslint": "^8.30.0",
+    "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.0.0",
     "hardhat": "^2.22.1",
     "hardhat-abi-exporter": "^2.10.1",
@@ -25,6 +25,8 @@
     "prettier-plugin-solidity": "^1.1.0",
     "solhint": "^4.1.1",
     "solidity-coverage": "^0.8.11",
+    "typechain": "^8.3.2",
+    "typescript-eslint": "^7.4.0",
     "zksync-ethers": "^6.0.0"
   },
   "scripts": {
@@ -34,10 +36,10 @@
     "export-abi": "npx hardhat export-abi",
     "lint": "npm run lint:js && npm run lint:sol",
     "lint:fix": "npm run lint:js:fix && npm run lint:sol:fix",
-    "lint:js": "prettier --log-level warn --ignore-path .gitignore '**/*.{js,ts}' --check && eslint --ignore-path .gitignore .",
-    "lint:js:fix": "prettier --log-level warn --ignore-path .gitignore '**/*.{js,ts}' --write && eslint --no-error-on-unmatched-pattern --ignore-path .gitignore . --fix",
-    "lint:sol": "prettier --log-level warn --ignore-path .gitignore 'contracts/**/*.sol' --check && solhint 'contracts/**/*.sol'",
-    "lint:sol:fix": "prettier --log-level warn --ignore-path .gitignore 'contracts/**/*.sol' --write"
+    "lint:js": "prettier --log-level warn 'script/*.ts' 'test/*.ts' --check && eslint 'script/*.ts' 'test/*.ts'",
+    "lint:js:fix": "prettier --log-level warn 'script/*.ts' 'test/*.ts' --write && eslint 'script/*.ts' 'test/*.ts' --fix",
+    "lint:sol": "prettier --log-level warn 'contracts/**/*.sol' --check && solhint 'contracts/**/*.sol'",
+    "lint:sol:fix": "prettier --log-level warn 'contracts/**/*.sol' --write"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.9.5",

@@ -17,7 +17,7 @@ function getContractName() {
 task('deployMulticall3', 'Deploy Multicall3')
   .addParam('skipVerify', 'Skip verify', false, types.boolean, true)
   .setAction(async (taskArgs, hardhat) => {
-    let skipVerify = taskArgs.skipVerify;
+    const skipVerify = taskArgs.skipVerify;
     console.log('skip verify contracts?', skipVerify);
 
     const contractDeployer = new ChainContractDeployer(hardhat);

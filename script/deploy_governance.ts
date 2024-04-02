@@ -40,9 +40,9 @@ task('deployGovernance', 'Deploy governance')
     if (adminAddr === undefined) {
       adminAddr = deployerAddr;
     }
-    let securityCouncilAddr = taskArgs.securityCouncil;
-    let minDelay = taskArgs.minDelay;
-    let skipVerify = taskArgs.skipVerify;
+    const securityCouncilAddr = taskArgs.securityCouncil;
+    const minDelay = taskArgs.minDelay;
+    const skipVerify = taskArgs.skipVerify;
     console.log('admin', adminAddr);
     console.log('securityCouncil', securityCouncilAddr);
     console.log('minDelay', minDelay);
@@ -84,7 +84,7 @@ task('deployGovernance', 'Deploy governance')
 task('encodeUUPSUpgradeCalldata', 'Encode calldata for uups upgrade')
   .addParam('newImplementation', 'The new implementation', undefined, types.string, false)
   .setAction(async (taskArgs, hardhat) => {
-    let newImplementation = taskArgs.newImplementation;
+    const newImplementation = taskArgs.newImplementation;
     console.log('new implementation', newImplementation);
 
     const contractFactory = await hardhat.ethers.getContractAt(
@@ -115,12 +115,12 @@ task('encodeOperation', 'Encode operation')
   )
   .addParam('delay', 'The delay', 0, types.int, true)
   .setAction(async (taskArgs, hardhat) => {
-    let target = taskArgs.target;
-    let value = taskArgs.value;
-    let data = taskArgs.data;
-    let predecessor = taskArgs.predecessor;
-    let salt = taskArgs.salt;
-    let delay = taskArgs.delay;
+    const target = taskArgs.target;
+    const value = taskArgs.value;
+    const data = taskArgs.data;
+    const predecessor = taskArgs.predecessor;
+    const salt = taskArgs.salt;
+    const delay = taskArgs.delay;
     console.log('target', target);
     console.log('value', value);
     console.log('data', data);
@@ -173,7 +173,7 @@ task('encodeUpdateDelay', 'Encode update delay')
   .addParam('delay', 'The delay', undefined, types.int, false)
   .addParam('gov', 'The governance address (default get from governance deploy log)', undefined, types.string, true)
   .setAction(async (taskArgs, hardhat) => {
-    let delay = taskArgs.delay;
+    const delay = taskArgs.delay;
     let gov = taskArgs.gov;
     console.log('delay', delay);
     if (gov === undefined) {
@@ -195,7 +195,7 @@ task('encodeUpdateSecurityCouncil', 'Encode update security council')
   .addParam('securityCouncil', 'The security council address', undefined, types.string, false)
   .addParam('gov', 'The governance address (default get from governance deploy log)', undefined, types.string, true)
   .setAction(async (taskArgs, hardhat) => {
-    let securityCouncil = taskArgs.securityCouncil;
+    const securityCouncil = taskArgs.securityCouncil;
     let gov = taskArgs.gov;
     console.log('security council', securityCouncil);
     if (gov === undefined) {

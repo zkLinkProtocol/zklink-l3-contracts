@@ -78,7 +78,7 @@ export function getDeployLog(name: string, network: string) {
     throw 'deploy log not exist';
   }
   const data = fs.readFileSync(deployLogPath, 'utf8');
-  let deployLog = JSON.parse(data);
+  const deployLog = JSON.parse(data);
   return { deployLogPath, deployLog };
 }
 

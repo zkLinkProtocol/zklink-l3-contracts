@@ -19,7 +19,6 @@ describe('MergeToeknPortal', function () {
   let user2: Signer;
   let user2Addr: string;
   let user3: Signer;
-  let user3Addr: string;
 
   beforeEach(async function () {
     [owner, recipient, commitee, user1, user2, user3] = await hre.ethers.getSigners();
@@ -28,7 +27,6 @@ describe('MergeToeknPortal', function () {
     commiteeAddr = await commitee.getAddress();
     user1Addr = await user1.getAddress();
     user2Addr = await user2.getAddress();
-    user3Addr = await user3.getAddress();
 
     const MergeTokenPortal = await ethers.getContractFactory('MergeTokenPortal');
     mergeTokenPortal = await upgrades.deployProxy(MergeTokenPortal, [commiteeAddr], {
@@ -69,7 +67,7 @@ describe('MergeToeknPortal', function () {
         .connect(owner)
         .addSourceToken(erc20MergeAddr1Token.target, erc2OSource0MergenToeken.target, 10000);
       await erc20MergeAddr1Token.connect(user3).approve(mergeTokenPortal.target, 500);
-      let sourceInfo = await mergeTokenPortal.getSourceTokenInfos(ownerAddr);
+      const sourceInfo = await mergeTokenPortal.getSourceTokenInfos(ownerAddr);
 
       if (sourceInfo.balance > 0) {
         expect(await mergeTokenPortal.removeSourceTkoen(ownerAddr)).to.be.revertedWith(
@@ -89,7 +87,7 @@ describe('MergeToeknPortal', function () {
     });
     it('Should add source token correctly', async function () {
       await mergeTokenPortal.connect(owner).addSourceToken(ownerAddr, recipientAddr, 100);
-      let sourceTokenInfo = await mergeTokenPortal.connect(owner).getSourceTokenInfos(ownerAddr);
+      const sourceTokenInfo = await mergeTokenPortal.connect(owner).getSourceTokenInfos(ownerAddr);
       expect(sourceTokenInfo.isSupported).to.equal(true);
       expect(sourceTokenInfo.isLocked).to.equal(false);
       expect(sourceTokenInfo.mergeToken).to.equal(recipientAddr);
@@ -101,7 +99,7 @@ describe('MergeToeknPortal', function () {
       await mergeTokenPortal.connect(owner).addSourceToken(ownerAddr, recipientAddr, 100);
       await mergeTokenPortal.removeSourceToken(ownerAddr);
       await mergeTokenPortal.connect(owner).addSourceToken(ownerAddr, recipientAddr, 1000);
-      let sourceTokenInfo = await mergeTokenPortal.connect(owner).getSourceTokenInfos(ownerAddr);
+      const sourceTokenInfo = await mergeTokenPortal.connect(owner).getSourceTokenInfos(ownerAddr);
       expect(sourceTokenInfo.isSupported).to.equal(true);
       expect(sourceTokenInfo.isLocked).to.equal(false);
       expect(sourceTokenInfo.mergeToken).to.equal(recipientAddr);
@@ -120,7 +118,7 @@ describe('MergeToeknPortal', function () {
     it('Should allow owner remove a source token', async function () {
       await mergeTokenPortal.connect(owner).addSourceToken(ownerAddr, recipientAddr, 100);
       await mergeTokenPortal.connect(owner).removeSourceToken(ownerAddr);
-      let sourceTokenInfo = await mergeTokenPortal.getSourceTokenInfos(ownerAddr);
+      const sourceTokenInfo = await mergeTokenPortal.getSourceTokenInfos(ownerAddr);
       expect(sourceTokenInfo.isSupported).to.equal(false);
       expect(sourceTokenInfo.isLocked).to.equal(false);
       expect(sourceTokenInfo.balance).to.equal(0n);
@@ -131,7 +129,7 @@ describe('MergeToeknPortal', function () {
       await mergeTokenPortal.connect(owner).addSourceToken(ownerAddr, recipientAddr, 100);
       await mergeTokenPortal.connect(commitee).removeSourceToken(ownerAddr);
 
-      let sourceTokenInfo = await mergeTokenPortal.getSourceTokenInfos(ownerAddr);
+      const sourceTokenInfo = await mergeTokenPortal.getSourceTokenInfos(ownerAddr);
       expect(sourceTokenInfo.isSupported).to.equal(false);
       expect(sourceTokenInfo.isLocked).to.equal(false);
       expect(sourceTokenInfo.balance).to.equal(0n);
@@ -249,7 +247,7 @@ describe('MergeToeknPortal', function () {
       await mergeTokenPortal
         .connect(owner)
         .addSourceToken(erc20MergeAddr1Token.target, erc2OSource0MergenToeken.target, 10000);
-      let sourceInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token.target);
+      const sourceInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token.target);
       if (sourceInfo.isSupported) {
         await expect(
           mergeTokenPortal.connect(user3).updateDepositStatus(erc20MergeAddr1Token.target, true),
@@ -283,7 +281,7 @@ describe('MergeToeknPortal', function () {
         .connect(owner)
         .addSourceToken(erc20MergeAddr1Token.target, erc2OSource0MergenToeken.target, 10000);
       await mergeTokenPortal.connect(owner).setDepositLimit(erc20MergeAddr1Token.target, initialAmount);
-      let sourceInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token.target);
+      const sourceInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token.target);
       expect(sourceInfo.depositLimit).to.equal(initialAmount);
     });
 
@@ -296,7 +294,7 @@ describe('MergeToeknPortal', function () {
       await erc20MergeAddr1Token.connect(user1).mint(user2Addr, 100);
       await erc20MergeAddr1Token.connect(user1).mint(user1Addr, 100);
       await mergeTokenPortal.connect(user1).deposit(erc20MergeAddr1Token.target, 10, user2Addr);
-      let sourceTokenInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token.target);
+      const sourceTokenInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token.target);
       const balance1 = await erc20MergeAddr1Token.connect(user1).balanceOf(user1);
       const balance2 = await erc20MergeAddr1Token.connect(user1).balanceOf(user2);
       expect(balance1).to.equal(90n);
@@ -317,7 +315,7 @@ describe('MergeToeknPortal', function () {
       await mergeTokenPortal.connect(user2).deposit(erc20MergeAddr1Token.target, 1000, user1Addr);
       await mergeTokenPortal.connect(user1).withdraw(erc20MergeAddr1Token.target, 500, user2Addr);
       await mergeTokenPortal.connect(user2).deposit(erc20MergeAddr1Token.target, 1000, user1Addr);
-      let sourceTokenInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token.target);
+      const sourceTokenInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token.target);
       const balance1 = await erc20MergeAddr1Token.connect(user1).balanceOf(user1);
       const balance2 = await erc20MergeAddr1Token.connect(user1).balanceOf(user2);
       const balance3 = await erc20MergeAddr2Token.connect(user1).balanceOf(user2);
@@ -401,7 +399,7 @@ describe('MergeToeknPortal', function () {
       await erc20MergeAddr1Token.connect(owner).approve(mergeTokenPortal.target, 1000);
       await erc20MergeAddr1Token.connect(user1).mint(ownerAddr, 10000);
       await mergeTokenPortal.connect(owner).setDepositLimit(erc20MergeAddr1Token.target, 500);
-      let sourceTokenInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token.target);
+      const sourceTokenInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token.target);
       const balance1 = await erc20MergeAddr1Token.connect(user1).balanceOf(ownerAddr);
       expect(balance1).to.equal(10000n);
       expect(sourceTokenInfo.depositLimit).to.equal(500);
@@ -442,7 +440,7 @@ describe('MergeToeknPortal', function () {
       await erc20MergeAddr1Token.connect(user1).mint(user2Addr, 10000);
       await mergeTokenPortal.connect(user2).deposit(erc20MergeAddr1Token.target, 1000, user1Addr);
       await mergeTokenPortal.connect(user1).withdraw(erc20MergeAddr1Token.target, 500, user2Addr);
-      let sourceTokenInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token.target);
+      const sourceTokenInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token.target);
       const balance1 = await erc20MergeAddr1Token.connect(user1).balanceOf(user1);
       const balance2 = await erc20MergeAddr1Token.connect(user1).balanceOf(user2);
       expect(balance1).to.equal(0n);
@@ -464,7 +462,7 @@ describe('MergeToeknPortal', function () {
       await mergeTokenPortal.connect(user1).withdraw(erc20MergeAddr1Token.target, 500, user2Addr);
       await mergeTokenPortal.connect(user2).deposit(erc20MergeAddr1Token.target, 1000, user1Addr);
       await mergeTokenPortal.connect(user1).withdraw(erc20MergeAddr1Token.target, 500, user2Addr);
-      let sourceTokenInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token.target);
+      const sourceTokenInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token.target);
       const balance1 = await erc20MergeAddr1Token.connect(user1).balanceOf(user1);
       const balance2 = await erc20MergeAddr1Token.connect(user1).balanceOf(user2);
       const balance3 = await erc20MergeAddr2Token.connect(user1).balanceOf(user1);
