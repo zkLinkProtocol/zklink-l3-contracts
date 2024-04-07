@@ -151,7 +151,7 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
     function setDepositLimit(address _sourceToken, uint256 _limit) external onlyOwner {
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
         require(tokenInfo.isSupported, "Source token is not supported");
-        require(_limit > tokenInfo.balance, "_limit must be greater than tokenInfo.balance.");
+        require(_limit >= tokenInfo.balance, "Invalid Specification");
 
         tokenInfo.depositLimit = _limit;
 
