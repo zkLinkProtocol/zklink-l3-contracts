@@ -19,7 +19,7 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
     address public securityCouncil;
 
     /// @dev A mapping merge token address => is merge token supported.
-    mapping(address mergeToken => bool) public isMergeTokenSupported;
+    mapping(address mergeToken => mapping(address sourceToken => bool)) public isMergeTokenSupported;
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
@@ -112,7 +112,7 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
     function addSourceToken(address _sourceToken, address _mergeToken, uint256 _depositLimit) external onlyOwner {
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
         require(!tokenInfo.isSupported, "Source token is already supported");
-        require(!isMergeTokenSupported[_mergeToken], "Merge token is already supported");
+        require(!isMergeTokenSupported[_mergeToken][_sourceToken], "Merge token is already supported");
         require(_sourceToken != address(0) && _mergeToken != address(0), "Invalid token address");
         require(_sourceToken != _mergeToken, "Should not Match");
         uint8 _sourceTokenDecimals = IERC20MetadataUpgradeable(_sourceToken).decimals();
@@ -126,7 +126,7 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
             balance: 0,
             depositLimit: _depositLimit
         });
-        isMergeTokenSupported[_mergeToken] = true;
+        isMergeTokenSupported[_mergeToken][_sourceToken] = true;
 
         emit SourceTokenAdded(_sourceToken, _mergeToken, _depositLimit);
     }
@@ -136,8 +136,8 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
         require(tokenInfo.isSupported, "Source token is already removed");
         require(tokenInfo.balance == 0, "Source Token balance is not zero");
+        delete isMergeTokenSupported[tokenInfo.mergeToken][_sourceToken];
         delete sourceTokenInfoMap[_sourceToken];
-        delete isMergeTokenSupported[tokenInfo.mergeToken];
 
         emit SourceTokenRemoved(_sourceToken);
     }
