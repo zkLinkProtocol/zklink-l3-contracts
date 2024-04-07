@@ -119,6 +119,7 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
     /// @notice Remove source token
     function removeSourceToken(address _sourceToken) external onlyOwnerOrSecurityCouncil {
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
+        require(tokenInfo.isSupported, "Source token is already removed");
         require(tokenInfo.balance == 0, "Source Token balance is not zero");
         delete sourceTokenInfoMap[_sourceToken];
         delete isMergeTokenSupported[tokenInfo.mergeToken];
