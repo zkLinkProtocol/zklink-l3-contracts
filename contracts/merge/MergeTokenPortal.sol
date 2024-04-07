@@ -110,8 +110,8 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
 
     /// @notice Add source token
     function addSourceToken(address _sourceToken, address _mergeToken, uint256 _depositLimit) external onlyOwner {
-        SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
-        require(!tokenInfo.isSupported, "Source token is already supported");
+        bool isSupported = sourceTokenInfoMap[_sourceToken].isSupported;
+        require(!isSupported, "Source token is already supported");
         require(!isMergeTokenSupported[_mergeToken][_sourceToken], "Merge token is already supported");
         require(_sourceToken != address(0) && _mergeToken != address(0), "Invalid token address");
         require(_sourceToken != _mergeToken, "Should not Match");
@@ -133,10 +133,13 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
 
     /// @notice Remove source token
     function removeSourceToken(address _sourceToken) external onlyOwnerOrSecurityCouncil {
-        SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
-        require(tokenInfo.isSupported, "Source token is already removed");
-        require(tokenInfo.balance == 0, "Source Token balance is not zero");
-        delete isMergeTokenSupported[tokenInfo.mergeToken][_sourceToken];
+        bool isSupported = sourceTokenInfoMap[_sourceToken].isSupported;
+        require(isSupported, "Source token is already removed");
+        uint256 balance = sourceTokenInfoMap[_sourceToken].balance;
+        require(balance == 0, "Source Token balance is not zero");
+
+        address mergeToken = sourceTokenInfoMap[_sourceToken].mergeToken;
+        delete isMergeTokenSupported[mergeToken][_sourceToken];
         delete sourceTokenInfoMap[_sourceToken];
 
         emit SourceTokenRemoved(_sourceToken);
