@@ -140,7 +140,7 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
 
         tokenInfo.isLocked = _isLocked;
 
-        emit SourceTokenLocked(_sourceToken, _isLocked);
+        emit SourceTokenStatusUpdated(_sourceToken, _isLocked);
     }
 
     /// @notice Set deposit limit

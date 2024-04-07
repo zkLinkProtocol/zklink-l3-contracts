@@ -22,7 +22,7 @@ interface IMergeTokenPortal {
 
     event SourceTokenRemoved(address indexed sourceToken);
 
-    event SourceTokenLocked(address indexed sourceToken, bool isLocked);
+    event SourceTokenStatusUpdated(address indexed sourceToken, bool isLocked);
 
     event DepositLimitUpdated(address indexed sourceToken, uint256 depositLimit);
 
