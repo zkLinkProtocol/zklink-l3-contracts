@@ -18,12 +18,15 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
     // @dev Security Council address
     address public securityCouncil;
 
+    /// @dev A mapping merge token address => is merge token supported.
+    mapping(address mergeToken => bool) public isMergeTokenSupported;
+
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new
      * variables without shifting down storage in the inheritance chain.
      * See https://docs.openzeppelin.com/contracts/4.x/upgradeable#storage_gaps
      */
-    uint256[48] private __gap;
+    uint256[47] private __gap;
 
     modifier onlyOwnerOrSecurityCouncil() {
         require(
@@ -99,6 +102,7 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
     function addSourceToken(address _sourceToken, address _mergeToken, uint256 _depositLimit) external onlyOwner {
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
         require(!tokenInfo.isSupported, "Source token is already supported");
+        require(!isMergeTokenSupported[_mergeToken], "Merge token is already supported");
         require(_sourceToken != address(0) && _mergeToken != address(0), "Invalid token address");
         sourceTokenInfoMap[_sourceToken] = SourceTokenInfo({
             isSupported: true,
@@ -107,6 +111,7 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
             balance: 0,
             depositLimit: _depositLimit
         });
+        isMergeTokenSupported[_mergeToken] = true;
 
         emit SourceTokenAdded(_sourceToken, _mergeToken, _depositLimit);
     }
@@ -116,6 +121,7 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
         require(tokenInfo.balance == 0, "Source Token balance is not zero");
         delete sourceTokenInfoMap[_sourceToken];
+        delete isMergeTokenSupported[tokenInfo.mergeToken];
 
         emit SourceTokenRemoved(_sourceToken);
     }
