@@ -62,6 +62,8 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
 
     /// @notice Deposit source token to mint merge token
     function deposit(address _sourceToken, uint256 _amount, address _receiver) external override nonReentrant {
+        require(_sourceToken != address(0), "Invalid source token address");
+        require(_receiver != address(0), "Invalid receiver address");
         require(_amount > 0, "Deposit amount is zero");
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
         require(tokenInfo.isSupported, "Source token is not supported");
@@ -84,6 +86,8 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
 
     /// @notice Burn merge token and get source token back
     function withdraw(address _sourceToken, uint256 _amount, address _receiver) external override nonReentrant {
+        require(_sourceToken != address(0), "Invalid source token address");
+        require(_receiver != address(0), "Invalid receiver address");
         require(_amount > 0, "Withdraw amount is zero");
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
         require(tokenInfo.isSupported, "Source token is not supported");
