@@ -71,7 +71,10 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
         require(afterBalance <= tokenInfo.depositLimit, "Source token deposit limit exceeded");
         tokenInfo.balance = afterBalance;
 
+        uint256 _sourceTokenBeforeBalance = IERC20Upgradeable(_sourceToken).balanceOf(address(this));
         IERC20Upgradeable(_sourceToken).safeTransferFrom(msg.sender, address(this), _amount);
+        uint256 _sourceTokenAfterBalance = IERC20Upgradeable(_sourceToken).balanceOf(address(this));
+        require(_sourceTokenAfterBalance - _sourceTokenBeforeBalance == _amount, "Not support deflationary token");
 
         address mergeToken = tokenInfo.mergeToken;
         IERC20MergeToken(mergeToken).mint(_receiver, _amount);
@@ -92,8 +95,11 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
 
         address mergeToken = tokenInfo.mergeToken;
         IERC20MergeToken(mergeToken).burn(msg.sender, _amount);
-
+        uint256 _sourceTokenBeforeBalance = IERC20Upgradeable(_sourceToken).balanceOf(address(this));
         IERC20Upgradeable(_sourceToken).safeTransfer(_receiver, _amount);
+        uint256 _sourceTokenAfterBalance = IERC20Upgradeable(_sourceToken).balanceOf(address(this));
+
+        require(_sourceTokenAfterBalance + _amount == _sourceTokenBeforeBalance, "Not support deflationary token");
 
         emit WithdrawFromMerge(_sourceToken, mergeToken, msg.sender, _amount, _receiver);
     }
