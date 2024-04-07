@@ -110,6 +110,7 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
         require(!tokenInfo.isSupported, "Source token is already supported");
         require(!isMergeTokenSupported[_mergeToken], "Merge token is already supported");
         require(_sourceToken != address(0) && _mergeToken != address(0), "Invalid token address");
+        require(_sourceToken != _mergeToken, "Should not Match");
         uint8 _sourceTokenDecimals = IERC20MetadataUpgradeable(_sourceToken).decimals();
         uint8 _mergeTokenDecimals = IERC20MetadataUpgradeable(_mergeToken).decimals();
         require(_sourceTokenDecimals == _mergeTokenDecimals, "Token decimals are not the same");
