@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
+import {IERC20MetadataUpgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/extensions/IERC20MetadataUpgradeable.sol";
 import {SafeERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/utils/SafeERC20Upgradeable.sol";
 import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
@@ -10,7 +10,7 @@ import {IMergeTokenPortal} from "../interfaces/IMergeTokenPortal.sol";
 import {IERC20MergeToken} from "../interfaces/IERC20MergeToken.sol";
 
 contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradeable, ReentrancyGuardUpgradeable {
-    using SafeERC20Upgradeable for IERC20Upgradeable;
+    using SafeERC20Upgradeable for IERC20MetadataUpgradeable;
 
     /// @dev A mapping source token address => source token status.
     mapping(address sourceToken => SourceTokenInfo) public sourceTokenInfoMap;
@@ -71,9 +71,9 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
         require(afterBalance <= tokenInfo.depositLimit, "Source token deposit limit exceeded");
         tokenInfo.balance = afterBalance;
 
-        uint256 _sourceTokenBeforeBalance = IERC20Upgradeable(_sourceToken).balanceOf(address(this));
-        IERC20Upgradeable(_sourceToken).safeTransferFrom(msg.sender, address(this), _amount);
-        uint256 _sourceTokenAfterBalance = IERC20Upgradeable(_sourceToken).balanceOf(address(this));
+        uint256 _sourceTokenBeforeBalance = IERC20MetadataUpgradeable(_sourceToken).balanceOf(address(this));
+        IERC20MetadataUpgradeable(_sourceToken).safeTransferFrom(msg.sender, address(this), _amount);
+        uint256 _sourceTokenAfterBalance = IERC20MetadataUpgradeable(_sourceToken).balanceOf(address(this));
         require(_sourceTokenAfterBalance - _sourceTokenBeforeBalance == _amount, "Not support deflationary token");
 
         address mergeToken = tokenInfo.mergeToken;
@@ -95,9 +95,9 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
 
         address mergeToken = tokenInfo.mergeToken;
         IERC20MergeToken(mergeToken).burn(msg.sender, _amount);
-        uint256 _sourceTokenBeforeBalance = IERC20Upgradeable(_sourceToken).balanceOf(address(this));
-        IERC20Upgradeable(_sourceToken).safeTransfer(_receiver, _amount);
-        uint256 _sourceTokenAfterBalance = IERC20Upgradeable(_sourceToken).balanceOf(address(this));
+        uint256 _sourceTokenBeforeBalance = IERC20MetadataUpgradeable(_sourceToken).balanceOf(address(this));
+        IERC20MetadataUpgradeable(_sourceToken).safeTransfer(_receiver, _amount);
+        uint256 _sourceTokenAfterBalance = IERC20MetadataUpgradeable(_sourceToken).balanceOf(address(this));
 
         require(_sourceTokenAfterBalance + _amount == _sourceTokenBeforeBalance, "Not support deflationary token");
 
@@ -110,6 +110,10 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
         require(!tokenInfo.isSupported, "Source token is already supported");
         require(!isMergeTokenSupported[_mergeToken], "Merge token is already supported");
         require(_sourceToken != address(0) && _mergeToken != address(0), "Invalid token address");
+        uint8 _sourceTokenDecimals = IERC20MetadataUpgradeable(_sourceToken).decimals();
+        uint8 _mergeTokenDecimals = IERC20MetadataUpgradeable(_mergeToken).decimals();
+        require(_sourceTokenDecimals == _mergeTokenDecimals, "Token decimals are not the same");
+
         sourceTokenInfoMap[_sourceToken] = SourceTokenInfo({
             isSupported: true,
             isLocked: false,
