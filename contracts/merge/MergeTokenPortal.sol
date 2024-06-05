@@ -110,6 +110,24 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
 
     /// @notice Add source token
     function addSourceToken(address _sourceToken, address _mergeToken, uint256 _depositLimit) external onlyOwner {
+        _addSourceToken(_sourceToken, _mergeToken, _depositLimit);
+    }
+
+    function batchAddSourceToken(
+        address[] calldata _sourceTokens,
+        address[] calldata _mergeTokens,
+        uint256[] calldata _depositLimits
+    ) external onlyOwnerOrSecurityCouncil {
+        require(
+            _sourceTokens.length == _mergeTokens.length && _sourceTokens.length == _depositLimits.length,
+            "Invalid input"
+        );
+        for (uint256 i = 0; i < _sourceTokens.length; i++) {
+            _addSourceToken(_sourceTokens[i], _mergeTokens[i], _depositLimits[i]);
+        }
+    }
+
+    function _addSourceToken(address _sourceToken, address _mergeToken, uint256 _depositLimit) internal {
         bool isSupported = sourceTokenInfoMap[_sourceToken].isSupported;
         require(!isSupported, "Source token is already supported");
         require(!isMergeTokenSupported[_mergeToken][_sourceToken], "Merge token is already supported");
@@ -133,6 +151,16 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
 
     /// @notice Remove source token
     function removeSourceToken(address _sourceToken) external onlyOwnerOrSecurityCouncil {
+        _removeSourceToken(_sourceToken);
+    }
+
+    function batchRemoveSourceToken(address[] calldata _sourceTokens) external onlyOwnerOrSecurityCouncil {
+        for (uint256 i = 0; i < _sourceTokens.length; i++) {
+            _removeSourceToken(_sourceTokens[i]);
+        }
+    }
+
+    function _removeSourceToken(address _sourceToken) internal {
         bool isSupported = sourceTokenInfoMap[_sourceToken].isSupported;
         require(isSupported, "Source token is already removed");
         uint256 balance = sourceTokenInfoMap[_sourceToken].balance;
@@ -147,6 +175,21 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
 
     /// @notice Lock source token
     function updateDepositStatus(address _sourceToken, bool _isLocked) external onlyOwnerOrSecurityCouncil {
+        _updateDepositStatus(_sourceToken, _isLocked);
+    }
+
+    function batchUpdateDepositStatus(
+        address[] calldata _sourceTokens,
+        bool[] calldata _isLockeds
+    ) external onlyOwnerOrSecurityCouncil {
+        require(_sourceTokens.length == _isLockeds.length, "Invalid input");
+
+        for (uint256 i = 0; i < _sourceTokens.length; i++) {
+            _updateDepositStatus(_sourceTokens[i], _isLockeds[i]);
+        }
+    }
+
+    function _updateDepositStatus(address _sourceToken, bool _isLocked) internal {
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
         require(tokenInfo.isSupported, "Source token is not supported");
 

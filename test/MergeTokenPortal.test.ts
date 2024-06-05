@@ -20,7 +20,7 @@ describe('MergeToeknPortal', function () {
   let user2Addr: string;
   let user3: Signer;
 
-  beforeEach(async function () {
+  before(async function () {
     [owner, recipient, commitee, user1, user2, user3] = await hre.ethers.getSigners();
     ownerAddr = await owner.getAddress();
     recipientAddr = await recipient.getAddress();
@@ -109,6 +109,52 @@ describe('MergeToeknPortal', function () {
       expect(sourceTokenInfo.depositLimit).to.equal(1000n);
     });
 
+    it('Should batch add source token correctly', async function () {
+      await mergeTokenPortal
+        .connect(owner)
+        .batchAddSourceToken(
+          [erc20MergeAddr1Token, erc20MergeAddr2Token],
+          [erc20MergeAddr2Token, erc20MergeAddr1Token],
+          [100, 1000],
+        );
+      const source1TokenInfo = await mergeTokenPortal.connect(owner).getSourceTokenInfos(erc20MergeAddr1Token);
+      expect(source1TokenInfo.isSupported).to.equal(true);
+      expect(source1TokenInfo.isLocked).to.equal(false);
+      expect(source1TokenInfo.mergeToken).to.equal(erc20MergeAddr2Token);
+      expect(source1TokenInfo.balance).to.equal(0n);
+      expect(source1TokenInfo.depositLimit).to.equal(100n);
+
+      const source2TokenInfo = await mergeTokenPortal.connect(owner).getSourceTokenInfos(erc20MergeAddr2Token);
+      expect(source2TokenInfo.isSupported).to.equal(true);
+      expect(source2TokenInfo.isLocked).to.equal(false);
+      expect(source2TokenInfo.mergeToken).to.equal(erc20MergeAddr1Token);
+      expect(source2TokenInfo.balance).to.equal(0n);
+      expect(source2TokenInfo.depositLimit).to.equal(1000n);
+    });
+
+    it('Should allow commitee batch add source token correctly', async function () {
+      await mergeTokenPortal
+        .connect(commitee)
+        .batchAddSourceToken(
+          [erc20MergeAddr1Token, erc20MergeAddr2Token],
+          [erc20MergeAddr2Token, erc20MergeAddr1Token],
+          [100, 1000],
+        );
+      const source1TokenInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token);
+      expect(source1TokenInfo.isSupported).to.equal(true);
+      expect(source1TokenInfo.isLocked).to.equal(false);
+      expect(source1TokenInfo.mergeToken).to.equal(erc20MergeAddr2Token);
+      expect(source1TokenInfo.balance).to.equal(0n);
+      expect(source1TokenInfo.depositLimit).to.equal(100n);
+
+      const source2TokenInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr2Token);
+      expect(source2TokenInfo.isSupported).to.equal(true);
+      expect(source2TokenInfo.isLocked).to.equal(false);
+      expect(source2TokenInfo.mergeToken).to.equal(erc20MergeAddr1Token);
+      expect(source2TokenInfo.balance).to.equal(0n);
+      expect(source2TokenInfo.depositLimit).to.equal(1000n);
+    });
+
     it('Should bot add source token if Invalid token address', async function () {
       await expect(
         mergeTokenPortal
@@ -137,6 +183,48 @@ describe('MergeToeknPortal', function () {
       expect(await mergeTokenPortal.isMergeTokenSupported(erc20MergeAddr2Token, erc20MergeAddr1Token)).to.equal(false);
     });
 
+    it('Should allow owner batch remove source token', async function () {
+      await mergeTokenPortal
+        .connect(commitee)
+        .batchAddSourceToken(
+          [erc20MergeAddr1Token, erc20MergeAddr2Token],
+          [erc20MergeAddr2Token, erc20MergeAddr1Token],
+          [100, 1000],
+        );
+      let source1TokenInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token);
+      expect(source1TokenInfo.isSupported).to.equal(true);
+      expect(source1TokenInfo.isLocked).to.equal(false);
+      expect(source1TokenInfo.balance).to.equal(0n);
+      expect(source1TokenInfo.depositLimit).to.equal(100n);
+      expect(source1TokenInfo.mergeToken).to.equal(erc20MergeAddr2Token);
+      let source2TokenInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr2Token);
+      expect(source2TokenInfo.isSupported).to.equal(true);
+      expect(source2TokenInfo.isLocked).to.equal(false);
+      expect(source2TokenInfo.balance).to.equal(0n);
+      expect(source2TokenInfo.depositLimit).to.equal(1000n);
+      expect(source2TokenInfo.mergeToken).to.equal(erc20MergeAddr1Token);
+      expect(await mergeTokenPortal.isMergeTokenSupported(erc20MergeAddr2Token, erc20MergeAddr1Token)).to.equal(true);
+      expect(await mergeTokenPortal.isMergeTokenSupported(erc20MergeAddr1Token, erc20MergeAddr2Token)).to.equal(true);
+
+      await mergeTokenPortal.connect(owner).batchRemoveSourceToken([erc20MergeAddr1Token, erc20MergeAddr2Token]);
+      source1TokenInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token);
+      expect(source1TokenInfo.isSupported).to.equal(false);
+      expect(source1TokenInfo.isLocked).to.equal(false);
+      expect(source1TokenInfo.balance).to.equal(0n);
+      expect(source1TokenInfo.depositLimit).to.equal(0n);
+      expect(source1TokenInfo.mergeToken).to.equal(ZERO_ADDRESS);
+
+      source2TokenInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr2Token);
+      expect(source2TokenInfo.isSupported).to.equal(false);
+      expect(source2TokenInfo.isLocked).to.equal(false);
+      expect(source2TokenInfo.balance).to.equal(0n);
+      expect(source2TokenInfo.depositLimit).to.equal(0n);
+      expect(source2TokenInfo.mergeToken).to.equal(ZERO_ADDRESS);
+
+      expect(await mergeTokenPortal.isMergeTokenSupported(erc20MergeAddr1Token, erc20MergeAddr2Token)).to.equal(false);
+      expect(await mergeTokenPortal.isMergeTokenSupported(erc20MergeAddr2Token, erc20MergeAddr1Token)).to.equal(false);
+    });
+
     it('Should allow commitee remove a source token2', async function () {
       await mergeTokenPortal.connect(owner).addSourceToken(erc20MergeAddr1Token, erc20MergeAddr2Token, 100);
       await mergeTokenPortal.connect(commitee).removeSourceToken(erc20MergeAddr1Token);
@@ -146,6 +234,22 @@ describe('MergeToeknPortal', function () {
       expect(sourceTokenInfo.isLocked).to.equal(false);
       expect(sourceTokenInfo.balance).to.equal(0n);
       expect(sourceTokenInfo.depositLimit).to.equal(0n);
+    });
+
+    it('Should allow commitee batch remove source token', async function () {
+      await mergeTokenPortal
+        .connect(commitee)
+        .batchAddSourceToken(
+          [erc20MergeAddr1Token, erc20MergeAddr2Token],
+          [erc20MergeAddr2Token, erc20MergeAddr1Token],
+          [100, 1000],
+        );
+      expect(await mergeTokenPortal.isMergeTokenSupported(erc20MergeAddr2Token, erc20MergeAddr1Token)).to.equal(true);
+      expect(await mergeTokenPortal.isMergeTokenSupported(erc20MergeAddr1Token, erc20MergeAddr2Token)).to.equal(true);
+
+      await mergeTokenPortal.connect(commitee).batchRemoveSourceToken([erc20MergeAddr1Token, erc20MergeAddr2Token]);
+      expect(await mergeTokenPortal.isMergeTokenSupported(erc20MergeAddr1Token, erc20MergeAddr2Token)).to.equal(false);
+      expect(await mergeTokenPortal.isMergeTokenSupported(erc20MergeAddr2Token, erc20MergeAddr1Token)).to.equal(false);
     });
 
     it('Should not allow non-owner or non-commitee remove a source token', async function () {
@@ -171,6 +275,57 @@ describe('MergeToeknPortal', function () {
       );
     });
 
+    it('Should allow owner or commitee update source token status', async function () {
+      await mergeTokenPortal.connect(owner).addSourceToken(erc20MergeAddr1Token, erc20MergeAddr2Token, 100);
+      let sourceInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token);
+      expect(sourceInfo.isLocked).to.equal(false);
+
+      await mergeTokenPortal.connect(owner).updateDepositStatus(erc20MergeAddr1Token, true);
+      sourceInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token);
+      expect(sourceInfo.isLocked).to.equal(true);
+
+      await mergeTokenPortal.connect(owner).updateDepositStatus(erc20MergeAddr1Token, false);
+      sourceInfo = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token);
+      expect(sourceInfo.isLocked).to.equal(false);
+    });
+
+    it('Should allow owner or commitee batch update source token status', async function () {
+      await mergeTokenPortal
+        .connect(commitee)
+        .batchAddSourceToken(
+          [erc20MergeAddr1Token, erc20MergeAddr2Token],
+          [erc20MergeAddr2Token, erc20MergeAddr1Token],
+          [100, 1000],
+        );
+      let source1Info = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token);
+      expect(source1Info.isLocked).to.equal(false);
+      let source2Info = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr2Token);
+      expect(source2Info.isLocked).to.equal(false);
+
+      await mergeTokenPortal
+        .connect(commitee)
+        .batchUpdateDepositStatus([erc20MergeAddr1Token, erc20MergeAddr2Token], [true, true]);
+      source1Info = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token);
+      expect(source1Info.isLocked).to.equal(true);
+      source2Info = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr2Token);
+      expect(source2Info.isLocked).to.equal(true);
+
+      await mergeTokenPortal
+        .connect(owner)
+        .batchUpdateDepositStatus([erc20MergeAddr1Token, erc20MergeAddr2Token], [false, false]);
+      source1Info = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token);
+      expect(source1Info.isLocked).to.equal(false);
+      source2Info = await mergeTokenPortal.getSourceTokenInfos(erc20MergeAddr1Token);
+      expect(source2Info.isLocked).to.equal(false);
+    });
+
+    it('Should not allow non-owner or non-commitee update source token status', async function () {
+      await mergeTokenPortal.connect(owner).addSourceToken(erc20MergeAddr1Token, erc20MergeAddr2Token, 100);
+      await expect(mergeTokenPortal.connect(user1).updateDepositStatus(erc20MergeAddr1Token, false)).to.be.revertedWith(
+        'Only owner or commitee can call this function',
+      );
+    });
+
     it('Should allow owner grant the security council role', async function () {
       const oldCommitee = await mergeTokenPortal.securityCouncil();
       expect(oldCommitee).to.equal(commiteeAddr);
@@ -191,6 +346,7 @@ describe('MergeToeknPortal', function () {
     });
 
     it('Should not allow grant the security council role to old one', async function () {
+      await mergeTokenPortal.connect(owner).grantSecurityCouncilRole(commiteeAddr);
       await expect(mergeTokenPortal.connect(owner).grantSecurityCouncilRole(commiteeAddr)).to.be.revertedWith(
         'The Security Council role address is the same as old one',
       );
@@ -213,13 +369,13 @@ describe('MergeToeknPortal', function () {
     it('Should mint tokens correctly', async function () {
       await erc2OSource0MergenToeken.connect(owner).mint(recipientAddr, 100);
       await erc2OSource0MergenToeken.connect(owner).burn(recipientAddr, 10);
-      await expect(await erc2OSource0MergenToeken.balanceOf(recipientAddr)).to.equal(90n);
+      expect(await erc2OSource0MergenToeken.balanceOf(recipientAddr)).to.equal(90n);
     });
 
     it('Should burn tokens correctly', async function () {
       await erc2OSource0MergenToeken.connect(owner).mint(recipientAddr, 200);
       await erc2OSource0MergenToeken.connect(owner).burn(recipientAddr, 100);
-      await expect(await erc2OSource0MergenToeken.balanceOf(recipientAddr)).to.equal(100n);
+      await expect(await erc2OSource0MergenToeken.balanceOf(recipientAddr)).to.equal(190n);
     });
   });
 

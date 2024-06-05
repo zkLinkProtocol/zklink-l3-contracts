@@ -52,10 +52,10 @@ const config: HardhatUserConfig = {
     hardhat: {
       zksync: false,
     },
-    zklinkGoerli: {
-      url: 'https://goerli.rpc.zklink.io',
-      ethNetwork: 'goerli',
-      verifyURL: 'https://goerli.explorer.zklink.io/contract_verification',
+    zklinkSepolia: {
+      url: 'https://sepolia.rpc.zklink.io',
+      ethNetwork: 'sepolia',
+      verifyURL: 'https://sepolia.explorer.zklink.io/contract_verification',
       zksync: true,
     },
     zklinkNova: {
