@@ -110,10 +110,10 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
 
     /// @notice Add source token
     function addSourceToken(address _sourceToken, address _mergeToken, uint256 _depositLimit) external onlyOwner {
+        require(_sourceToken != address(0) && _mergeToken != address(0), "Invalid token address");
         bool isSupported = sourceTokenInfoMap[_sourceToken].isSupported;
         require(!isSupported, "Source token is already supported");
         require(!isMergeTokenSupported[_mergeToken][_sourceToken], "Merge token is already supported");
-        require(_sourceToken != address(0) && _mergeToken != address(0), "Invalid token address");
         require(_sourceToken != _mergeToken, "Should not Match");
         uint8 _sourceTokenDecimals = IERC20MetadataUpgradeable(_sourceToken).decimals();
         uint8 _mergeTokenDecimals = IERC20MetadataUpgradeable(_mergeToken).decimals();
@@ -150,9 +150,11 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
         require(tokenInfo.isSupported, "Source token is not supported");
 
-        tokenInfo.isLocked = _isLocked;
+        if (tokenInfo.isLocked != _isLocked) {
+            tokenInfo.isLocked = _isLocked;
 
-        emit SourceTokenStatusUpdated(_sourceToken, _isLocked);
+            emit SourceTokenStatusUpdated(_sourceToken, _isLocked);
+        }
     }
 
     /// @notice Set deposit limit
@@ -161,9 +163,11 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
         require(tokenInfo.isSupported, "Source token is not supported");
         require(_limit >= tokenInfo.balance, "Invalid Specification");
 
-        tokenInfo.depositLimit = _limit;
+        if (tokenInfo.depositLimit != _limit) {
+            tokenInfo.depositLimit = _limit;
 
-        emit DepositLimitUpdated(_sourceToken, _limit);
+            emit DepositLimitUpdated(_sourceToken, _limit);
+        }
     }
 
     /// @notice Grant security council role
