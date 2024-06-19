@@ -132,18 +132,6 @@ contract Governance is IGovernance, Ownable2Step {
         emit TransparentOperationScheduled(id, _delay, _operation);
     }
 
-    /// @notice Propose "shadow" upgrade, upgrade data is not publishing on-chain.
-    /// @notice The owner will be able to execute the proposal either:
-    /// - With a `delay` timelock on its own.
-    /// - With security council instantly.
-    /// @dev Only the current owner can propose an upgrade.
-    /// @param _id The operation hash (see `hashOperation` function)
-    /// @param _delay The delay time (in seconds) after which the proposed upgrade may be executed by the owner.
-    // function scheduleShadow(bytes32 _id, uint256 _delay) external onlyOwner {
-    //     _schedule(_id, _delay);
-    //     emit ShadowOperationScheduled(_id, _delay);
-    // }
-
     /*//////////////////////////////////////////////////////////////
                             CANCELING CALLS
     //////////////////////////////////////////////////////////////*/
@@ -179,25 +167,6 @@ contract Governance is IGovernance, Ownable2Step {
         timestamps[id] = EXECUTED_PROPOSAL_TIMESTAMP;
         emit OperationExecuted(id);
     }
-
-    /// @notice Executes the scheduled operation with the security council instantly.
-    /// @dev Only the security council may execute an operation instantly.
-    /// @param _operation The operation parameters will be executed with the upgrade.
-    // function executeInstant(Operation calldata _operation) external payable onlySecurityCouncil {
-    //     bytes32 id = hashOperation(_operation);
-    //     // Check if the predecessor operation is completed.
-    //     _checkPredecessorDone(_operation.predecessor);
-    //     // Ensure that the operation is in a pending state before proceeding.
-    //     require(isOperationPending(id), "Operation must be pending before execution");
-    //     // Execute operation.
-    //     _execute(_operation.calls);
-    //     // Reconfirming that the operation is still pending before execution.
-    //     // This is needed to avoid unexpected reentrancy attacks of re-executing the same operation.
-    //     require(isOperationPending(id), "Operation must be pending after execution");
-    //     // Set operation to be done
-    //     timestamps[id] = EXECUTED_PROPOSAL_TIMESTAMP;
-    //     emit OperationExecuted(id);
-    // }
 
     /// @dev Returns the identifier of an operation.
     /// @param _operation The operation object to compute the identifier for.
