@@ -67,7 +67,7 @@ interface IGovernance {
     event OperationExecuted(bytes32 indexed _id);
 
     /// @notice Emitted when the security council address is changed.
-    event ChangeSecurityCouncil(address _securityCouncilBefore, address _securityCouncilAfter);
+    event ChangeSecurityCouncil(address indexed _securityCouncilBefore, address indexed _securityCouncilAfter);
 
     /// @notice Emitted when the minimum delay for future operations is modified.
     event ChangeMinDelay(uint256 _delayBefore, uint256 _delayAfter);
