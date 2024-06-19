@@ -47,13 +47,9 @@ interface IGovernance {
 
     function scheduleTransparent(Operation calldata _operation, uint256 _delay) external;
 
-    // function scheduleShadow(bytes32 _id, uint256 _delay) external;
-
     function cancel(bytes32 _id) external;
 
     function execute(Operation calldata _operation) external payable;
-
-    // function executeInstant(Operation calldata _operation) external payable;
 
     function hashOperation(Operation calldata _operation) external pure returns (bytes32);
 
