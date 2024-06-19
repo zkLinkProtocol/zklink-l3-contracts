@@ -150,9 +150,11 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
         SourceTokenInfo storage tokenInfo = sourceTokenInfoMap[_sourceToken];
         require(tokenInfo.isSupported, "Source token is not supported");
 
-        tokenInfo.isLocked = _isLocked;
+        if (tokenInfo.isLocked != _isLocked) {
+            tokenInfo.isLocked = _isLocked;
 
-        emit SourceTokenStatusUpdated(_sourceToken, _isLocked);
+            emit SourceTokenStatusUpdated(_sourceToken, _isLocked);
+        }
     }
 
     /// @notice Set deposit limit
@@ -161,9 +163,11 @@ contract MergeTokenPortal is IMergeTokenPortal, UUPSUpgradeable, OwnableUpgradea
         require(tokenInfo.isSupported, "Source token is not supported");
         require(_limit >= tokenInfo.balance, "Invalid Specification");
 
-        tokenInfo.depositLimit = _limit;
+        if (tokenInfo.depositLimit != _limit) {
+            tokenInfo.depositLimit = _limit;
 
-        emit DepositLimitUpdated(_sourceToken, _limit);
+            emit DepositLimitUpdated(_sourceToken, _limit);
+        }
     }
 
     /// @notice Grant security council role
